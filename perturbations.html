@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J2 Perturbations Calculator — Nodal Regression & Apsidal Rotation — Free Online Tool</title>
+<meta name="description" content="Free J2 orbit perturbation calculator. Compute secular nodal regression, apsidal (perigee) rotation and mean anomaly drift from altitude, eccentricity and inclination — with critical-inclination and sun-synchronous checks.">
+<meta name="keywords" content="J2 perturbation calculator, nodal regression, apsidal rotation, argument of perigee drift, critical inclination, frozen orbit, RAAN drift">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/perturbations.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="J2 Perturbations Calculator">
+<meta property="og:description" content="Secular nodal regression, perigee rotation and mean drift under Earth oblateness.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"J2 Perturbations Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html" class="active">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🌍 J2 Perturbations Calculator</h1>
+  <p>Nodal regression · apsidal rotation · nodal period · critical inclination &amp; SSO checks</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="leo">LEO 500 / 51.6°</button>
+    <button data-preset="sso">SSO 700 / 98.2°</button>
+    <button data-preset="molniya">Molniya 63.4°</button>
+    <button data-preset="gps">GPS MEO 55°</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Inputs</h2>
+      <div class="row">
+        <label>Perigee altitude<span class="hint">km above surface</span></label>
+        <input type="number" id="hp" value="500" step="any">
+      </div>
+      <div class="row">
+        <label>Apogee altitude<span class="hint">km — same value = circular</span></label>
+        <input type="number" id="ha" value="500" step="any">
+      </div>
+      <div class="row">
+        <label>Inclination<span class="hint">deg</span></label>
+        <input type="number" id="inc" value="51.6" step="any">
+      </div>
+      <div class="note" id="flagnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Secular Rates (J2)</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Nodal regression Ω̇</div><div class="v"><span id="r_raan">–</span> <span class="u">°/day</span></div></div>
+        <div class="metric"><div class="k">Apsidal rotation ω̇</div><div class="v"><span id="r_argp">–</span> <span class="u">°/day</span></div></div>
+        <div class="metric"><div class="k">Mean anomaly drift ΔṀ</div><div class="v"><span id="r_mdot">–</span> <span class="u">°/day</span></div></div>
+        <div class="metric"><div class="k">Node full turn</div><div class="v"><span id="r_nodeturn">–</span> <span class="u">days</span></div></div>
+        <div class="metric"><div class="k">Perigee full turn</div><div class="v"><span id="r_periturn">–</span> <span class="u">days</span></div></div>
+        <div class="metric"><div class="k">Keplerian period</div><div class="v"><span id="r_T">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Nodal period</div><div class="v"><span id="r_Tn">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Anomalistic period</div><div class="v"><span id="r_Ta">–</span> <span class="u">min</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter <b>perigee/apogee altitude</b> and <b>inclination</b> — the J2 secular rates update live.</span><span class="zh-only">输入<b>近/远地点高度</b>与<b>倾角</b>——J2 长期变化率实时更新。</span></li>
+      <li><span class="en-only">Ω̇ &lt; 0 for prograde orbits (node drifts west), Ω̇ &gt; 0 for retrograde; +0.9856°/day means sun-synchronous.</span><span class="zh-only">顺行轨道 Ω̇ &lt; 0（升交点西退），逆行轨道 Ω̇ &gt; 0；等于 +0.9856°/天 即太阳同步。</span></li>
+      <li><span class="en-only">At the <b>critical inclination 63.43°</b> (or 116.57°) the perigee stops rotating — the basis of Molniya/Tundra orbits and frozen-perigee designs.</span><span class="zh-only">在<b>临界倾角 63.43°</b>（或 116.57°）处近地点停转——这是闪电/苔原轨道与冻结轨道设计的基础。</span></li>
+      <li><span class="en-only">Use the <b>nodal period</b> (not the Keplerian one) when designing repeat ground tracks — the Repeat Ground Track tool does this automatically.</span><span class="zh-only">设计回归轨道时应使用<b>交点周期</b>而非开普勒周期——回归轨道工具已自动处理。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>J2 secular rates</h2>
+      <p>With <code>p = a(1−e²)</code>, <code>n = √(μ/a³)</code> and <code>k = (3/2)·J₂·n·(R_E/p)²</code>:</p>
+      <p><strong>Node:</strong> <code>Ω̇ = −k·cos i</code></p>
+      <p><strong>Perigee:</strong> <code>ω̇ = (k/2)·(4 − 5·sin²i)</code> — zero at i = 63.43° / 116.57°</p>
+      <p><strong>Mean anomaly:</strong> <code>Ṁ = n + (k/2)·√(1−e²)·(2 − 3·sin²i)</code></p>
+      <p>Nodal (draconitic) period <code>T_node = 2π/(Ṁ + ω̇)</code>; anomalistic period <code>T_anom = 2π/Ṁ</code>. These first-order secular rates capture the dominant oblateness effect; higher zonal harmonics, drag and luni-solar terms matter for precision work but rarely change a design trade.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>J2 长期变化率</h2>
+      <p>令 <code>p = a(1−e²)</code>，<code>n = √(μ/a³)</code>，<code>k = (3/2)·J₂·n·(R_E/p)²</code>：</p>
+      <p><strong>升交点:</strong> <code>Ω̇ = −k·cos i</code></p>
+      <p><strong>近地点:</strong> <code>ω̇ = (k/2)·(4 − 5·sin²i)</code> —— 在 i = 63.43° / 116.57° 处为零</p>
+      <p><strong>平近点角:</strong> <code>Ṁ = n + (k/2)·√(1−e²)·(2 − 3·sin²i)</code></p>
+      <p>交点周期 <code>T_node = 2π/(Ṁ + ω̇)</code>；近点周期 <code>T_anom = 2π/Ṁ</code>。一阶长期项已涵盖扁率的主导影响；高阶带谐、大气阻力与日月摄动对精密工作重要，但很少改变总体设计权衡。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free J2 perturbation calculator · nodal regression, apsidal rotation · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137, J2=1.08262668e-3;
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const SSDEG=0.98564736;               // deg/day sun rate
+
+function compute(){
+  let hp=num('hp'), ha=num('ha');
+  if(ha<hp){ const sw=hp; hp=ha; ha=sw; }
+  const rp=RE+hp, ra=RE+ha;
+  if(rp<=RE-100) return;
+  const a=(rp+ra)/2, e=(ra-rp)/(ra+rp), inc=num('inc')*D2R;
+  const p=a*(1-e*e), n=Math.sqrt(MU/(a*a*a));
+  const k=1.5*n*J2*(RE/p)*(RE/p), s2=Math.sin(inc)**2;
+  const raanDot=-k*Math.cos(inc);                    // rad/s
+  const argpDot=0.5*k*(4-5*s2);
+  const dmDot=0.5*k*Math.sqrt(1-e*e)*(2-3*s2);
+  const mDot=n+dmDot;
+  const T=2*Math.PI/n, Tn=2*Math.PI/(mDot+argpDot), Ta=2*Math.PI/mDot;
+  const dg=r=>r*86400*R2D;                           // rad/s → deg/day
+  const f2=x=>x.toFixed(2), f4=x=>x.toFixed(4);
+  $('r_raan').textContent=(raanDot>=0?'+':'')+f4(dg(raanDot));
+  $('r_argp').textContent=(argpDot>=0?'+':'')+f4(dg(argpDot));
+  $('r_mdot').textContent=(dmDot>=0?'+':'')+f4(dg(dmDot));
+  $('r_nodeturn').textContent=Math.abs(dg(raanDot))>1e-6?Math.round(360/Math.abs(dg(raanDot))).toLocaleString('en-US'):'∞';
+  $('r_periturn').textContent=Math.abs(dg(argpDot))>1e-6?Math.round(360/Math.abs(dg(argpDot))).toLocaleString('en-US'):'∞';
+  $('r_T').textContent=f2(T/60);
+  $('r_Tn').textContent=f2(Tn/60);
+  $('r_Ta').textContent=f2(Ta/60);
+
+  const flags=[];
+  const iDeg=num('inc');
+  if(Math.abs(iDeg-63.43)<0.6||Math.abs(iDeg-116.57)<0.6)
+    flags.push(t('≈ critical inclination — perigee is (nearly) frozen.','≈ 临界倾角——近地点（近似）冻结。'));
+  if(Math.abs(dg(raanDot)-SSDEG)<0.02)
+    flags.push(t('Node rate matches the sun rate — this orbit is sun-synchronous.','升交点速率等于太阳速率——该轨道为太阳同步轨道。'));
+  else
+    flags.push(t('For sun-synchronicity Ω̇ must be +0.9856°/day (see the SSO tool).','太阳同步要求 Ω̇ = +0.9856°/天（见太阳同步工具）。'));
+  if(iDeg>90) flags.push(t('Retrograde orbit (i > 90°).','逆行轨道（i > 90°）。'));
+  $('flagnote').innerHTML=flags.join('<br>');
+}
+const presets={
+  leo:{hp:500,ha:500,inc:51.6},
+  sso:{hp:700,ha:700,inc:98.19},
+  molniya:{hp:600,ha:39750,inc:63.4},
+  gps:{hp:20180,ha:20180,inc:55},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const kk in c)$(kk).value=c[kk];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

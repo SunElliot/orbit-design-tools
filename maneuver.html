@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbital Maneuver Δv Calculator — Hohmann, Plane Change, Phasing — Free Online Tool</title>
+<meta name="description" content="Free orbital maneuver delta-v calculator. Hohmann transfer with optional combined plane change, pure inclination change, and phasing maneuvers — burn-by-burn delta-v and transfer time.">
+<meta name="keywords" content="delta v calculator, hohmann transfer, plane change delta v, phasing maneuver, orbit raising, combined maneuver, orbital mechanics">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/maneuver.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Orbital Maneuver Δv Calculator">
+<meta property="og:description" content="Hohmann transfer, plane change and phasing maneuver delta-v, burn by burn.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Orbital Maneuver Δv Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html" class="active">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🔥 Orbital Maneuver Δv Calculator</h1>
+  <p>Hohmann transfer · combined plane change · pure inclination change · phasing</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="raise">Raise 400 → 700 km</button>
+    <button data-preset="gtogeo">LEO 250 → GEO, Δi 27°</button>
+    <button data-preset="incl">Plane change 5° @ 550</button>
+    <button data-preset="phase">Phase 30° in 10 revs</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Hohmann Transfer</h2>
+      <div class="row">
+        <label>Start altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="h1" value="400" step="any">
+      </div>
+      <div class="row">
+        <label>Target altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="h2" value="700" step="any">
+      </div>
+      <div class="row">
+        <label>Plane change Δi<span class="hint">deg, done at 2nd burn (0 = coplanar)</span></label>
+        <input type="number" id="di2" value="0" step="any">
+      </div>
+      <div class="resgrid" style="margin-top:12px">
+        <div class="metric"><div class="k">Burn 1 Δv</div><div class="v"><span id="r_dv1">–</span> <span class="u">m/s</span></div></div>
+        <div class="metric"><div class="k">Burn 2 Δv</div><div class="v"><span id="r_dv2">–</span> <span class="u">m/s</span></div></div>
+        <div class="metric"><div class="k">Total Δv</div><div class="v"><span id="r_dvt">–</span> <span class="u">m/s</span></div></div>
+        <div class="metric"><div class="k">Transfer time</div><div class="v"><span id="r_tt">–</span> <span class="u">min</span></div></div>
+      </div>
+      <div class="note" id="hohnote"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>Pure Plane Change</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="pcAlt" value="550" step="any">
+      </div>
+      <div class="row">
+        <label>Inclination change Δi<span class="hint">deg</span></label>
+        <input type="number" id="pcDi" value="5" step="any">
+      </div>
+      <div class="resgrid" style="margin-top:12px">
+        <div class="metric"><div class="k">Circular velocity</div><div class="v"><span id="r_vc">–</span> <span class="u">km/s</span></div></div>
+        <div class="metric"><div class="k">Plane-change Δv</div><div class="v"><span id="r_pcdv">–</span> <span class="u">m/s</span></div></div>
+      </div>
+      <div class="note" id="pcnote"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>Phasing Maneuver</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="phAlt" value="550" step="any">
+      </div>
+      <div class="row">
+        <label>Phase shift Δφ<span class="hint">deg along-track, + = move forward</span></label>
+        <input type="number" id="phShift" value="30" step="any">
+      </div>
+      <div class="row">
+        <label>Phasing revolutions<span class="hint">revs spent in the phasing orbit</span></label>
+        <input type="number" id="phRevs" value="10" step="1" min="1">
+      </div>
+      <div class="resgrid" style="margin-top:12px">
+        <div class="metric"><div class="k">Phasing orbit period</div><div class="v"><span id="r_php">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Phasing perigee/apogee</div><div class="v"><span id="r_phpa">–</span> <span class="u">km</span></div></div>
+        <div class="metric"><div class="k">Total Δv (2 burns)</div><div class="v"><span id="r_phdv">–</span> <span class="u">m/s</span></div></div>
+        <div class="metric"><div class="k">Time to complete</div><div class="v"><span id="r_pht">–</span> <span class="u">h</span></div></div>
+      </div>
+      <div class="note" id="phnote"></div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only"><b>Hohmann:</b> enter start/target circular altitudes; add a Δi to combine the plane change with the second (slowest) burn — far cheaper than a separate change.</span><span class="zh-only"><b>霍曼转移：</b>输入起始/目标圆轨道高度；填 Δi 可把倾角改变合并到第二次（速度最低处）点火——远比单独改倾角省。</span></li>
+      <li><span class="en-only"><b>Pure plane change:</b> Δv = 2·v·sin(Δi/2). At LEO speeds 1° costs ≈ 130 m/s — avoid plane changes whenever the launch can do them.</span><span class="zh-only"><b>纯改平面：</b>Δv = 2·v·sin(Δi/2)。LEO 速度下每 1° 约需 130 m/s——能靠发射入轨解决就不要在轨改。</span></li>
+      <li><span class="en-only"><b>Phasing:</b> to shift along-track by Δφ, lower (to advance) or raise (to fall back) the orbit for N revs, then restore. More revs = less Δv but more time.</span><span class="zh-only"><b>相位机动：</b>沿迹移动 Δφ 时，先降轨（超前）或升轨（滞后）飞 N 圈再恢复。圈数越多 Δv 越省，但耗时越长。</span></li>
+      <li><span class="en-only">Add the drag make-up Δv from the <b>Orbit Lifetime</b> tool and margins (typ. 5–10%) to build the full mission Δv budget.</span><span class="zh-only">再加上<b>轨道寿命</b>工具给出的阻力补偿 Δv 与余量（通常 5–10%），即得完整任务 Δv 预算。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Maneuver equations</h2>
+      <p><strong>Hohmann:</strong> transfer ellipse a_t = (r₁+r₂)/2; <code>Δv₁ = √(μ(2/r₁−1/a_t)) − √(μ/r₁)</code>, <code>Δv₂ = √(μ/r₂) − √(μ(2/r₂−1/a_t))</code>; time = half the transfer period.</p>
+      <p><strong>Combined 2nd burn:</strong> <code>Δv₂ = √(v_ta² + v₂² − 2·v_ta·v₂·cos Δi)</code> — doing the plane change where velocity is lowest.</p>
+      <p><strong>Pure plane change:</strong> <code>Δv = 2·v·sin(Δi/2)</code></p>
+      <p><strong>Phasing:</strong> the phasing period is <code>T_p = T·(1 − Δφ/(360·N))</code>; the burn pair enters and exits an ellipse with the same radius at the burn point. The tool warns if the phasing perigee dips into the atmosphere.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>机动公式</h2>
+      <p><strong>霍曼转移：</strong>转移椭圆 a_t = (r₁+r₂)/2；<code>Δv₁ = √(μ(2/r₁−1/a_t)) − √(μ/r₁)</code>，<code>Δv₂ = √(μ/r₂) − √(μ(2/r₂−1/a_t))</code>；转移时间为转移轨道周期之半。</p>
+      <p><strong>合并第二次点火：</strong><code>Δv₂ = √(v_ta² + v₂² − 2·v_ta·v₂·cos Δi)</code> —— 在速度最低处改平面。</p>
+      <p><strong>纯改平面：</strong><code>Δv = 2·v·sin(Δi/2)</code></p>
+      <p><strong>相位机动：</strong>相位轨道周期 <code>T_p = T·(1 − Δφ/(360·N))</code>；两次点火进出一条在点火点等半径的椭圆。若相位轨道近地点过低，工具会给出告警。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free orbital maneuver Δv calculator · Hohmann, plane change, phasing · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137;
+const D2R=Math.PI/180;
+
+function compute(){
+  const f0=x=>Math.round(x).toLocaleString('en-US');
+  const f2=x=>x.toFixed(2);
+  // ── Hohmann ──
+  const r1=RE+num('h1'), r2=RE+num('h2'), di2=num('di2')*D2R;
+  if(r1>RE&&r2>RE){
+    const at=(r1+r2)/2;
+    const v1=Math.sqrt(MU/r1), v2=Math.sqrt(MU/r2);
+    const vt1=Math.sqrt(MU*(2/r1-1/at)), vt2=Math.sqrt(MU*(2/r2-1/at));
+    const dv1=Math.abs(vt1-v1)*1000;
+    const dv2=Math.sqrt(vt2*vt2+v2*v2-2*vt2*v2*Math.cos(di2))*1000;
+    const tt=Math.PI*Math.sqrt(at*at*at/MU)/60;
+    $('r_dv1').textContent=f0(dv1);
+    $('r_dv2').textContent=f0(dv2);
+    $('r_dvt').textContent=f0(dv1+dv2);
+    $('r_tt').textContent=tt>=600?f2(tt/60)+' h':f2(tt);
+    $('hohnote').textContent = num('h2')>=num('h1')
+      ? t('Burn 1 at the lower orbit enters the transfer ellipse; burn 2 circularizes'+(num('di2')?' and rotates the plane by '+num('di2')+'°':'')+'.','第一次点火进入转移椭圆；第二次点火圆化'+(num('di2')?('并同时改平面 '+num('di2')+'°'):'')+'。')
+      : t('Descending transfer — burns are retrograde; same Δv magnitudes as the ascending case.','下降转移——两次点火为减速方向，Δv 大小与上升情形相同。');
+  }
+  // ── Pure plane change ──
+  const rp=RE+num('pcAlt');
+  if(rp>RE){
+    const vc=Math.sqrt(MU/rp);
+    const dv=2*vc*Math.sin(Math.abs(num('pcDi'))*D2R/2)*1000;
+    $('r_vc').textContent=f2(vc);
+    $('r_pcdv').textContent=f0(dv);
+    $('pcnote').textContent=t('Rule of thumb at this altitude: ≈ '+f0(2*vc*Math.sin(0.5*D2R)*1000)+' m/s per degree.','该高度经验值：每度约 '+f0(2*vc*Math.sin(0.5*D2R)*1000)+' m/s。');
+  }
+  // ── Phasing ──
+  const rph=RE+num('phAlt'), dphi=num('phShift'), N=Math.max(1,Math.round(num('phRevs')));
+  if(rph>RE&&Math.abs(dphi)>0){
+    const T=2*Math.PI*Math.sqrt(rph*rph*rph/MU);
+    const Tp=T*(1-dphi/(360*N));
+    const ap=Math.cbrt(MU*(Tp/(2*Math.PI))**2);
+    const vc=Math.sqrt(MU/rph);
+    const vph=Math.sqrt(Math.abs(MU*(2/rph-1/ap)));
+    const dv=2*Math.abs(vph-vc)*1000;
+    const rOther=2*ap-rph;
+    const hOther=rOther-RE;
+    $('r_php').textContent=f2(Tp/60);
+    $('r_phpa').textContent=f0(Math.min(num('phAlt'),hOther))+' / '+f0(Math.max(num('phAlt'),hOther));
+    $('r_phdv').textContent=f2(dv);
+    $('r_pht').textContent=f2(N*Tp/3600);
+    $('phnote').textContent = hOther<200
+      ? t('⚠ Phasing perigee at '+f0(hOther)+' km — too low; use more revolutions.','⚠ 相位轨道近地点仅 '+f0(hOther)+' km——过低，请增加圈数。')
+      : (dphi>0
+          ? t('Phasing orbit is below the original — the satellite advances along-track.','相位轨道低于原轨道——沿迹向前赶。')
+          : t('Phasing orbit is above the original — the satellite falls back along-track.','相位轨道高于原轨道——沿迹向后退。'));
+  }
+}
+const presets={
+  raise:{h1:400,h2:700,di2:0},
+  gtogeo:{h1:250,h2:35786,di2:27},
+  incl:{pcAlt:550,pcDi:5},
+  phase:{phAlt:550,phShift:30,phRevs:10},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

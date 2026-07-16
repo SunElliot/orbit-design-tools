@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repeat Ground Track Orbit Designer — Free Online Tool</title>
+<meta name="description" content="Free repeat ground track orbit designer. Solve the altitude for an exact R revs / D days repeat cycle including J2 nodal regression, or analyze the ground-track shift of a given orbit.">
+<meta name="keywords" content="repeat ground track, repeat cycle orbit, revisit orbit design, ground track shift, J2 nodal period, earth observation orbit">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/repeat-orbit.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Repeat Ground Track Orbit Designer">
+<meta property="og:description" content="Solve the altitude for an exact R revs / D days repeat cycle including J2.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Repeat Ground Track Orbit Designer","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html" class="active">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🔁 Repeat Ground Track Orbit Designer</h1>
+  <p>Ground-track shift · exact R revs / D days repeat altitude · J2 included</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="sso1409">SSO 233/16 (Landsat-like)</button>
+    <button data-preset="sso14310">SSO 143/10 (Sentinel-2-like)</button>
+    <button data-preset="iss">51.6° 500 km</button>
+    <button data-preset="daily">Daily repeat 15/1</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Current Orbit</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="alt" value="705" step="any">
+      </div>
+      <div class="row">
+        <label>Inclination mode<span class="hint">SSO couples i to altitude</span></label>
+        <select id="incMode" style="width:190px;text-align:left">
+          <option value="sso">Sun-synchronous (auto)</option>
+          <option value="fixed">Fixed inclination</option>
+        </select>
+      </div>
+      <div class="row" id="row_inc" style="display:none">
+        <label>Inclination<span class="hint">deg</span></label>
+        <input type="number" id="inc" value="97.9" step="any">
+      </div>
+      <div class="note" id="curnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Ground-Track Analysis</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Inclination used</div><div class="v"><span id="r_inc">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Nodal period</div><div class="v"><span id="r_Tn">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Revs per nodal day</div><div class="v"><span id="r_k">–</span> <span class="u">rev</span></div></div>
+        <div class="metric"><div class="k">Ground-track shift / rev</div><div class="v"><span id="r_shift">–</span> <span class="u">deg W</span></div></div>
+        <div class="metric"><div class="k">Equator spacing / rev</div><div class="v"><span id="r_shiftkm">–</span> <span class="u">km</span></div></div>
+      </div>
+      <div class="note" id="neartitle"></div>
+      <div style="overflow-x:auto"><table id="neartable"></table></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Repeat Solver</h2>
+      <p class="en-only" style="color:var(--muted);font-size:.85rem;margin:0 0 10px">Solves the circular altitude whose ground track repeats exactly after R revolutions in D nodal days, with the inclination mode chosen above.</p>
+      <p class="zh-only" style="color:var(--muted);font-size:.85rem;margin:0 0 10px">按上方选定的倾角模式，求解地面轨迹恰好在 D 天内 R 圈后重复的圆轨道高度。</p>
+      <div class="row" style="max-width:360px">
+        <label>Revolutions R<span class="hint">total revs in the cycle</span></label>
+        <input type="number" id="revs" value="233" step="1" min="1">
+      </div>
+      <div class="row" style="max-width:360px">
+        <label>Repeat cycle D<span class="hint">days</span></label>
+        <input type="number" id="days" value="16" step="1" min="1">
+      </div>
+      <div id="solveResult" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the <b>altitude</b> and choose the <b>inclination mode</b> — sun-synchronous (i follows altitude) or fixed.</span><span class="zh-only">输入<b>高度</b>并选择<b>倾角模式</b>——太阳同步（倾角随高度）或固定倾角。</span></li>
+      <li><span class="en-only">Read the <b>revs per nodal day</b> and the <b>westward shift per rev</b>; the table lists the nearest exact repeat cycles and the altitude that achieves each.</span><span class="zh-only">读取<b>每交点日圈数</b>与<b>每圈西移量</b>；表格列出最近的精确回归周期及其对应高度。</span></li>
+      <li><span class="en-only">Or ask directly: enter <b>R revs / D days</b> in the solver — e.g. Landsat uses 233/16 at ≈ 705 km.</span><span class="zh-only">也可直接反解：在求解器中输入 <b>R 圈 / D 天</b>——如 Landsat 为 233/16，高度约 705 km。</span></li>
+      <li><span class="en-only">Check the resulting equator spacing against your payload swath in <b>Coverage &amp; Swath</b> to confirm full coverage within one cycle.</span><span class="zh-only">把回归周期内的赤道条带间距与<b>覆盖与幅宽</b>工具算出的载荷幅宽对比，确认一个周期内能无缝覆盖。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Repeat ground track condition</h2>
+      <p>Per nodal revolution the ground track shifts westward by <code>ΔL = (ω_E − Ω̇)·T_node</code>, where T<sub>node</sub> = 2π/(Ṁ + ω̇) is the draconitic period and Ω̇, ω̇, Ṁ include J2 secular rates. The track repeats exactly when</p>
+      <p><code>R · ΔL = D · 2π</code> — R revolutions span D nodal days.</p>
+      <p>Writing R/D = k + q as integer-plus-fraction (e.g. 233/16 = 14 + 9/16) shows the daily pattern: the track advances by the sub-cycle fraction each day and closes after D days. The solver bisects on altitude, re-evaluating the SSO inclination at each step when coupled.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>回归轨道条件</h2>
+      <p>每交点圈地面轨迹西移 <code>ΔL = (ω_E − Ω̇)·T_node</code>，其中交点周期 T<sub>node</sub> = 2π/(Ṁ + ω̇)，且 Ω̇、ω̇、Ṁ 含 J2 长期项。当满足</p>
+      <p><code>R · ΔL = D · 2π</code>（R 圈恰好跨 D 个交点日）时轨迹精确重复。</p>
+      <p>把 R/D 写成整数加分数（如 233/16 = 14 + 9/16）即可看出逐日推进规律：轨迹每天推进一个子周期分数，D 天后闭合。求解器对高度做二分迭代，太阳同步模式下每步重算倾角。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free repeat ground track designer · J2 nodal period & regression · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137, J2=1.08262668e-3;
+const WE=7.2921159e-5, SSRATE=1.99096871e-7;
+const D2R=Math.PI/180, R2D=180/Math.PI;
+
+function ssoInc(a){
+  const n=Math.sqrt(MU/(a*a*a));
+  const c=-SSRATE/(1.5*n*J2*(RE/a)*(RE/a));
+  return Math.abs(c)<=1?Math.acos(c):NaN;
+}
+function trackData(a,inc){            // circular orbit, J2 secular
+  const n=Math.sqrt(MU/(a*a*a));
+  const kf=1.5*n*J2*(RE/a)*(RE/a), s2=Math.sin(inc)**2;
+  const raanDot=-kf*Math.cos(inc);
+  const argpDot=0.5*kf*(4-5*s2);
+  const mDot=n+0.5*kf*(2-3*s2);
+  const Tn=2*Math.PI/(mDot+argpDot);
+  const shift=(WE-raanDot)*Tn;        // rad W per rev
+  return {Tn,shift,raanDot,revsPerDay:2*Math.PI/shift};
+}
+function incFor(a){
+  if($('incMode').value==='sso') return ssoInc(a);
+  return num('inc')*D2R;
+}
+function solveAlt(Rr,Dd){             // bisection on altitude 150..2000 km
+  const f=h=>{
+    const a=RE+h, inc=incFor(a);
+    if(isNaN(inc)) return NaN;
+    const td=trackData(a,inc);
+    return Rr*td.shift-Dd*2*Math.PI;  // >0: too low (shift too big)? shift grows with Tn...
+  };
+  let lo=150,hi=2000,flo=f(lo),fhi=f(hi);
+  if(isNaN(flo)||isNaN(fhi)||flo*fhi>0) return NaN;
+  for(let it=0;it<80;it++){
+    const mid=(lo+hi)/2,fm=f(mid);
+    if(isNaN(fm)) return NaN;
+    if(flo*fm<=0){hi=mid;fhi=fm;}else{lo=mid;flo=fm;}
+  }
+  return (lo+hi)/2;
+}
+function gcd(x,y){ while(y){const r=x%y;x=y;y=r;} return x; }
+
+function compute(){
+  $('row_inc').style.display = $('incMode').value==='fixed'?'':'none';
+  const alt=num('alt'); if(alt<=100) return;
+  const a=RE+alt, inc=incFor(a);
+  const f2=x=>x.toFixed(2), f3=x=>x.toFixed(3);
+  if(isNaN(inc)){
+    $('curnote').textContent=t('No SSO inclination exists at this altitude — switch to fixed inclination.','该高度无太阳同步倾角——请切换为固定倾角。');
+    return;
+  }
+  const td=trackData(a,inc);
+  $('r_inc').textContent=f3(inc*R2D);
+  $('r_Tn').textContent=f2(td.Tn/60);
+  $('r_k').textContent=td.revsPerDay.toFixed(4);
+  $('r_shift').textContent=f2(td.shift*R2D);
+  $('r_shiftkm').textContent=Math.round(td.shift*RE).toLocaleString('en-US');
+  $('curnote').textContent=t('The ground track drifts westward by '+f2(td.shift*R2D)+'° per rev ('+td.revsPerDay.toFixed(4)+' revs per nodal day).','地面轨迹每圈西移 '+f2(td.shift*R2D)+'°（每交点日 '+td.revsPerDay.toFixed(4)+' 圈）。');
+
+  // nearest exact repeats: for D=1..16, R=round(k·D), coprime, solve altitude
+  $('neartitle').textContent=t('Nearest exact repeat cycles (altitude adjusted):','最近的精确回归周期（微调高度后）：');
+  let rows='<tr><th>'+t('Cycle','周期')+'</th><th>R / D</th><th>'+t('Altitude','高度')+'</th><th>Δh</th><th>'+t('Equator spacing','赤道条带间距')+'</th></tr>';
+  const seen={};
+  let count=0;
+  for(let Dd=1;Dd<=16&&count<6;Dd++){
+    const Rr=Math.round(td.revsPerDay*Dd);
+    if(Rr<1) continue;
+    const g=gcd(Rr,Dd); const key=(Rr/g)+'/'+(Dd/g);
+    if(seen[key]) continue; seen[key]=1;
+    const h=solveAlt(Rr,Dd);
+    if(isNaN(h)) continue;
+    const spacing=40075/Rr;
+    rows+='<tr><td>'+Dd+' '+t('day','天')+(Dd>1&&window.SATLANG!=='zh'?'s':'')+'</td><td>'+Rr+' / '+Dd+
+      '</td><td>'+f2(h)+' km</td><td>'+(h-alt>=0?'+':'')+f2(h-alt)+' km</td><td>'+f2(spacing)+' km</td></tr>';
+    count++;
+  }
+  $('neartable').innerHTML=rows;
+  solveRepeat();
+}
+function solveRepeat(){
+  const Rr=Math.round(num('revs')), Dd=Math.round(num('days'));
+  const el=$('solveResult');
+  if(Rr<1||Dd<1){ el.innerHTML=''; return; }
+  const h=solveAlt(Rr,Dd);
+  if(isNaN(h)){
+    el.innerHTML='<span style="color:var(--bad)">'+t('No solution between 150 and 2000 km for this R/D.','150–2000 km 之间不存在满足该 R/D 的解。')+'</span>';
+    return;
+  }
+  const a=RE+h, inc=incFor(a), td=trackData(a,inc);
+  const kInt=Math.floor(Rr/Dd), frac=Rr-kInt*Dd;
+  const f2=x=>x.toFixed(2);
+  el.innerHTML='<div class="margin-box margin-good" style="font-size:1rem">'+
+    t('Altitude ≈ ','高度 ≈ ')+'<b>'+f2(h)+' km</b>'+
+    (($('incMode').value==='sso')?(' · i = '+(inc*R2D).toFixed(3)+'°'):'')+
+    ' · T<sub>node</sub> = '+f2(td.Tn/60)+' min</div>'+
+    '<div style="font-size:.85rem;color:var(--muted);margin-top:8px">'+
+    t('Pattern: '+kInt+' + '+frac+'/'+Dd+' revs/day · equator spacing '+f2(40075/Rr)+' km after the full cycle.',
+      '规律：每天 '+kInt+' + '+frac+'/'+Dd+' 圈 · 整周期后赤道条带间距 '+f2(40075/Rr)+' km。')+'</div>';
+}
+const presets={
+  sso1409:{alt:705,incMode:'sso',revs:233,days:16},
+  sso14310:{alt:786,incMode:'sso',revs:143,days:10},
+  iss:{alt:500,incMode:'fixed',inc:51.6,revs:61,days:4},
+  daily:{alt:561,incMode:'sso',revs:15,days:1},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

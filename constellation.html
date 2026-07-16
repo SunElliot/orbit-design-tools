@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walker Constellation Designer — i:T/P/F Calculator — Free Online Tool</title>
+<meta name="description" content="Free Walker delta constellation designer. Enter i:T/P/F to get plane spacing, in-plane spacing, phase offset, per-satellite RAAN/anomaly table and a single-satellite footprint estimate.">
+<meta name="keywords" content="walker constellation calculator, T/P/F, constellation design, RAAN spacing, phasing factor, LEO constellation">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/constellation.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Walker Constellation Designer">
+<meta property="og:description" content="Walker delta pattern i:T/P/F — spacing, phasing and per-satellite elements.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Walker Constellation Designer","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html" class="active">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>✨ Walker Constellation Designer</h1>
+  <p>Walker delta i:T/P/F — plane &amp; in-plane spacing, phasing, per-satellite elements</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="gps">GPS-like 55°:24/6/1</button>
+    <button data-preset="iridium">Iridium-like 86.4°:66/6/2</button>
+    <button data-preset="leo">Broadband 53°:72/9/1</button>
+    <button data-preset="small">Smallsat EO 97.5°:12/3/1</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Walker Pattern</h2>
+      <div class="row">
+        <label>Total satellites T</label>
+        <input type="number" id="tt" value="24" step="1" min="1">
+      </div>
+      <div class="row">
+        <label>Planes P<span class="hint">must divide T</span></label>
+        <input type="number" id="pp" value="6" step="1" min="1">
+      </div>
+      <div class="row">
+        <label>Phasing factor F<span class="hint">0 … P−1</span></label>
+        <input type="number" id="ff" value="1" step="1" min="0">
+      </div>
+      <div class="row">
+        <label>Inclination<span class="hint">deg</span></label>
+        <input type="number" id="inc" value="55" step="any">
+      </div>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="alt" value="20180" step="any">
+      </div>
+      <div class="row">
+        <label>Min elevation ε<span class="hint">deg — for the footprint metric</span></label>
+        <input type="number" id="elev" value="10" step="any">
+      </div>
+      <div class="note" id="wknote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Pattern Properties</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Sats per plane</div><div class="v"><span id="r_spp">–</span> <span class="u"></span></div></div>
+        <div class="metric"><div class="k">RAAN spacing</div><div class="v"><span id="r_draan">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">In-plane spacing</div><div class="v"><span id="r_dslot">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Inter-plane phase offset</div><div class="v"><span id="r_dphase">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Orbital period</div><div class="v"><span id="r_T">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Single-sat footprint λ</div><div class="v"><span id="r_lam">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Footprint / Earth</div><div class="v"><span id="r_frac">–</span> <span class="u">%</span></div></div>
+        <div class="metric"><div class="k">T × footprint / Earth</div><div class="v"><span id="r_tfrac">–</span> <span class="u">×</span></div></div>
+      </div>
+      <div class="note" id="covnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Per-Satellite Elements</h2>
+      <div style="overflow-x:auto"><table id="sats"></table></div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the Walker pattern <b>i:T/P/F</b> — T satellites in P equally-spaced planes at inclination i, with phasing factor F setting the anomaly offset between adjacent planes (ΔM = 360·F/T).</span><span class="zh-only">输入 Walker 构型 <b>i:T/P/F</b> —— T 颗卫星均布于 P 个等间隔轨道面，倾角 i，相位因子 F 决定相邻面间的相位差（ΔM = 360·F/T）。</span></li>
+      <li><span class="en-only">The table lists every satellite's <b>RAAN and initial mean anomaly</b> — a ready starting point for a propagator or STK/GMAT scenario.</span><span class="zh-only">表格给出每颗卫星的<b>升交点赤经与初始平近点角</b>——可直接作为轨道递推或 STK/GMAT 场景的初值。</span></li>
+      <li><span class="en-only">"T × footprint / Earth" &gt; 1 is necessary (not sufficient) for continuous global coverage; real gap analysis needs a propagator, but this quickly rules out undersized patterns.</span><span class="zh-only">“T × 足迹 / 地球” &gt; 1 是连续全球覆盖的必要（非充分）条件；精确的缝隙分析需递推仿真，但该指标能快速排除规模不足的方案。</span></li>
+      <li><span class="en-only">All planes share one inclination — for SSO constellations set i from the <b>Sun-Synchronous</b> tool.</span><span class="zh-only">所有轨道面共用同一倾角——太阳同步星座请用<b>太阳同步轨道</b>工具确定 i。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Walker delta patterns</h2>
+      <p>A Walker delta constellation <code>i:T/P/F</code> spreads P orbital planes evenly over 360° of RAAN (Δ Ω = 360°/P), with T/P satellites evenly spaced in each plane (Δ M = 360·P/T within a plane). The phasing factor F (0…P−1) staggers adjacent planes by <code>ΔM = 360°·F/T</code>, which controls how satellites interleave at plane crossings — critical for avoiding coverage gaps and, at low altitude, collision risk at high-latitude crossings.</p>
+      <p>GPS uses roughly 55°:24/6/1 at 20 180 km; Iridium is a near-polar Walker star 86.4°:66/6/2 at 780 km. Broadband LEO shells are Walker deltas with tens of planes.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>Walker 星座构型</h2>
+      <p>Walker delta 星座 <code>i:T/P/F</code> 把 P 个轨道面均匀分布在 360° 升交点赤经上（ΔΩ = 360°/P），每面 T/P 颗卫星等间隔（面内 ΔM = 360·P/T）。相位因子 F（0…P−1）使相邻面错开 <code>ΔM = 360°·F/T</code>，决定卫星在轨道面交叉处的交错方式——对避免覆盖缝隙以及低轨高纬交叉处的碰撞风险都很关键。</p>
+      <p>GPS 约为 55°:24/6/1（20 180 km）；铱星为近极轨 Walker star 86.4°:66/6/2（780 km）；低轨宽带星座多为数十个面的 Walker delta。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free Walker constellation designer · i:T/P/F spacing & phasing · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137;
+const D2R=Math.PI/180, R2D=180/Math.PI;
+
+function compute(){
+  const T=Math.max(1,Math.round(num('tt')));
+  const P=Math.max(1,Math.round(num('pp')));
+  const F=Math.max(0,Math.round(num('ff')));
+  const alt=num('alt'), eps=Math.min(Math.max(num('elev'),0),89)*D2R;
+  const f1=x=>x.toFixed(1), f2=x=>x.toFixed(2);
+  if(T%P!==0){
+    $('wknote').textContent=t('P must divide T ('+T+'/'+P+' is not an integer).','P 必须整除 T（'+T+'/'+P+' 不是整数）。');
+    return;
+  }
+  if(F>=P) $('wknote').textContent=t('Note: F is normally 0…P−1; '+F+' wraps around.','注意：F 通常取 0…P−1；'+F+' 将回绕。');
+  else $('wknote').textContent='';
+  const S=T/P;
+  const a=RE+alt;
+  const Tmin=2*Math.PI*Math.sqrt(a*a*a/MU)/60;
+  const eta=Math.asin((RE/a)*Math.cos(eps));
+  const lam=Math.PI/2-eps-eta;
+  const frac=(1-Math.cos(lam))/2*100;
+  $('r_spp').textContent=S;
+  $('r_draan').textContent=f1(360/P);
+  $('r_dslot').textContent=f1(360/S);
+  $('r_dphase').textContent=f2(360*F/T);
+  $('r_T').textContent=f1(Tmin);
+  $('r_lam').textContent=f2(lam*R2D);
+  $('r_frac').textContent=f2(frac);
+  $('r_tfrac').textContent=f2(T*frac/100);
+  $('covnote').textContent = T*frac/100>=1
+    ? t('Combined footprints exceed the Earth\'s surface — continuous coverage is plausible; verify gaps with a propagator.','足迹合计超过地球表面积——连续覆盖可行；请用递推仿真核实缝隙。')
+    : t('Combined footprints cover only '+f1(T*frac)+'% of the Earth — continuous global coverage is impossible with this pattern.','足迹合计仅覆盖地球的 '+f1(T*frac)+'% —— 该构型不可能实现连续全球覆盖。');
+  // per-satellite table
+  let rows='<tr><th>#</th><th>'+t('Plane','面')+'</th><th>'+t('Slot','位')+'</th><th>RAAN Ω (°)</th><th>M₀ (°)</th></tr>';
+  const maxRows=120;
+  let idx=0;
+  outer:
+  for(let pl=0;pl<P;pl++){
+    for(let sl=0;sl<S;sl++){
+      idx++;
+      if(idx>maxRows){rows+='<tr><td colspan="5">… '+(T-maxRows)+' '+t('more','更多')+'</td></tr>';break outer;}
+      const raan=(360/P*pl)%360;
+      const m0=(360/S*sl+360*F/T*pl)%360;
+      rows+='<tr><td>'+idx+'</td><td>'+(pl+1)+'</td><td>'+(sl+1)+'</td><td>'+raan.toFixed(2)+'</td><td>'+m0.toFixed(2)+'</td></tr>';
+    }
+  }
+  $('sats').innerHTML=rows;
+}
+const presets={
+  gps:{tt:24,pp:6,ff:1,inc:55,alt:20180,elev:10},
+  iridium:{tt:66,pp:6,ff:2,inc:86.4,alt:780,elev:8},
+  leo:{tt:72,pp:9,ff:1,inc:53,alt:550,elev:25},
+  small:{tt:12,pp:3,ff:1,inc:97.5,alt:600,elev:5},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

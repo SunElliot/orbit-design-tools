@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbit Basics Calculator — Period, Velocity & Elements — Free Online Tool</title>
+<meta name="description" content="Free orbit calculator. Compute semi-major axis, eccentricity, orbital period, perigee/apogee velocity, mean motion and specific energy from perigee and apogee altitude.">
+<meta name="keywords" content="orbit calculator, orbital period, orbital velocity, semi-major axis, eccentricity, mean motion, perigee apogee, vis-viva">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/orbit-basics.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Orbit Basics Calculator — Period, Velocity & Elements">
+<meta property="og:description" content="Semi-major axis, eccentricity, period, velocities and energy from perigee/apogee altitude.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Orbit Basics Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html" class="active">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🪐 Orbit Basics Calculator</h1>
+  <p>Semi-major axis · eccentricity · period · velocities · energy from perigee/apogee altitude</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="iss">ISS-like 420 km</button>
+    <button data-preset="sso500">SSO 500 km</button>
+    <button data-preset="gto">GTO 250×35786</button>
+    <button data-preset="molniya">Molniya 600×39750</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Inputs</h2>
+      <div class="row">
+        <label>Perigee altitude<span class="hint">km above surface</span></label>
+        <input type="number" id="hp" value="420" step="any">
+      </div>
+      <div class="row">
+        <label>Apogee altitude<span class="hint">km — same value = circular</span></label>
+        <input type="number" id="ha" value="420" step="any">
+      </div>
+      <div class="note" id="ellnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Results</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Semi-major axis a</div><div class="v"><span id="r_a">–</span> <span class="u">km</span></div></div>
+        <div class="metric"><div class="k">Eccentricity e</div><div class="v"><span id="r_e">–</span> <span class="u"></span></div></div>
+        <div class="metric"><div class="k">Orbital period</div><div class="v"><span id="r_T">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Mean motion</div><div class="v"><span id="r_n">–</span> <span class="u">rev/day</span></div></div>
+        <div class="metric"><div class="k">Perigee velocity</div><div class="v"><span id="r_vp">–</span> <span class="u">km/s</span></div></div>
+        <div class="metric"><div class="k">Apogee velocity</div><div class="v"><span id="r_va">–</span> <span class="u">km/s</span></div></div>
+        <div class="metric"><div class="k">Escape velocity @ perigee</div><div class="v"><span id="r_vesc">–</span> <span class="u">km/s</span></div></div>
+        <div class="metric"><div class="k">Specific energy</div><div class="v"><span id="r_en">–</span> <span class="u">km²/s²</span></div></div>
+        <div class="metric"><div class="k">Angular momentum h</div><div class="v"><span id="r_h">–</span> <span class="u">km²/s</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Pick a <b>preset</b> or enter <b>perigee</b> and <b>apogee altitude</b> — equal values describe a circular orbit.</span><span class="zh-only">选一个<b>预设</b>，或输入<b>近地点</b>和<b>远地点高度</b>——两者相等即圆轨道。</span></li>
+      <li><span class="en-only">Read the <b>period</b>, <b>mean motion</b> (rev/day) and <b>velocities</b> at perigee and apogee.</span><span class="zh-only">读取<b>轨道周期</b>、<b>平均运动</b>（圈/天）以及近/远地点<b>速度</b>。</span></li>
+      <li><span class="en-only">Use the period and mean motion as inputs to the <b>Repeat Ground Track</b> and <b>Coverage</b> tools; feed the altitude into the <b>SSO</b> tool for a sun-synchronous inclination.</span><span class="zh-only">周期与平均运动可作为<b>回归轨道</b>和<b>覆盖分析</b>工具的输入；把高度填入<b>太阳同步轨道</b>工具可得同步倾角。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Two-body orbit equations</h2>
+      <p><strong>Geometry:</strong> <code>r_p = R_E + h_p</code>, <code>r_a = R_E + h_a</code>, <code>a = (r_p + r_a)/2</code>, <code>e = (r_a − r_p)/(r_a + r_p)</code></p>
+      <p><strong>Period (Kepler):</strong> <code>T = 2π·√(a³/μ)</code> with μ = 398 600.4418 km³/s²</p>
+      <p><strong>Vis-viva:</strong> <code>v = √(μ·(2/r − 1/a))</code> — evaluated at perigee and apogee</p>
+      <p><strong>Specific energy:</strong> <code>ε = −μ/(2a)</code>; <strong>angular momentum:</strong> <code>h = √(μ·a·(1−e²))</code></p>
+      <p>These are unperturbed two-body values. Real orbits drift under J2, drag and third-body forces — see the <a href="perturbations.html">J2 Perturbations</a> tool for secular rates.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>二体轨道公式</h2>
+      <p><strong>几何:</strong> <code>r_p = R_E + h_p</code>，<code>r_a = R_E + h_a</code>，<code>a = (r_p + r_a)/2</code>，<code>e = (r_a − r_p)/(r_a + r_p)</code></p>
+      <p><strong>周期(开普勒):</strong> <code>T = 2π·√(a³/μ)</code>，μ = 398 600.4418 km³/s²</p>
+      <p><strong>活力公式:</strong> <code>v = √(μ·(2/r − 1/a))</code> —— 分别在近地点与远地点求值</p>
+      <p><strong>比能量:</strong> <code>ε = −μ/(2a)</code>；<strong>角动量:</strong> <code>h = √(μ·a·(1−e²))</code></p>
+      <p>以上为无摄二体值。真实轨道在 J2、大气阻力与三体引力作用下漂移——长期变化率见 <a href="perturbations.html">J2 摄动</a> 工具。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free orbit basics calculator · period, velocity, elements · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137;
+
+function compute(){
+  let hp=num('hp'), ha=num('ha');
+  if(ha<hp){ const sw=hp; hp=ha; ha=sw; }
+  const rp=RE+hp, ra=RE+ha;
+  if(rp<=RE-100||ra<=0){ return; }
+  const a=(rp+ra)/2, e=(ra-rp)/(ra+rp);
+  const T=2*Math.PI*Math.sqrt(a*a*a/MU);          // s
+  const n=86400/T;                                 // rev/day
+  const vp=Math.sqrt(MU*(2/rp-1/a));
+  const va=Math.sqrt(MU*(2/ra-1/a));
+  const vesc=Math.sqrt(2*MU/rp);
+  const en=-MU/(2*a);
+  const am=Math.sqrt(MU*a*(1-e*e));
+  const f2=x=>x.toFixed(2), f4=x=>x.toFixed(4);
+  $('r_a').textContent=f2(a);
+  $('r_e').textContent=f4(e);
+  $('r_T').textContent=T>=6000?(T/3600).toFixed(2)+' h / '+f2(T/60):f2(T/60);
+  $('r_n').textContent=f2(n);
+  $('r_vp').textContent=f2(vp);
+  $('r_va').textContent=f2(va);
+  $('r_vesc').textContent=f2(vesc);
+  $('r_en').textContent=f2(en);
+  $('r_h').textContent=Math.round(am).toLocaleString('en-US');
+  $('ellnote').textContent = e<1e-4
+    ? t('Circular orbit — velocity is constant at '+f2(vp)+' km/s.','圆轨道 —— 速度恒为 '+f2(vp)+' km/s。')
+    : t('Elliptical orbit, e = '+f4(e)+'. Time is mostly spent near apogee.','椭圆轨道，e = '+f4(e)+'。卫星大部分时间位于远地点附近。');
+}
+const presets={
+  iss:{hp:420,ha:420},
+  sso500:{hp:500,ha:500},
+  gto:{hp:250,ha:35786},
+  molniya:{hp:600,ha:39750},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

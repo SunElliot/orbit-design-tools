@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satellite Coverage & Swath Calculator — Free Online Tool</title>
+<meta name="description" content="Free satellite coverage calculator. Compute swath width, Earth central angle, footprint area, slant range and nadir angle from altitude and either minimum elevation or sensor half-cone angle.">
+<meta name="keywords" content="satellite coverage calculator, swath width, footprint area, earth central angle, slant range, nadir angle, field of view">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/coverage.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Satellite Coverage & Swath Calculator">
+<meta property="og:description" content="Swath width, footprint area and slant range from altitude and elevation or FOV.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Satellite Coverage & Swath Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html" class="active">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🗺️ Satellite Coverage &amp; Swath Calculator</h1>
+  <p>Swath width · Earth central angle · footprint area · slant range · nadir angle</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="comm5">Comms 550 km / 25° elev</button>
+    <button data-preset="eo">EO sensor 700 km / 15° FOV</button>
+    <button data-preset="sar">SAR 600 km / 35° look</button>
+    <button data-preset="geo">GEO / 10° elev</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Inputs</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="alt" value="550" step="any">
+      </div>
+      <div class="row">
+        <label>Constrain by<span class="hint">what limits the footprint</span></label>
+        <select id="mode" style="width:210px;text-align:left">
+          <option value="elev">Min ground elevation</option>
+          <option value="fov">Sensor half-cone (off-nadir)</option>
+        </select>
+      </div>
+      <div class="row" id="row_elev">
+        <label>Min elevation ε<span class="hint">deg — user/ground constraint</span></label>
+        <input type="number" id="elev" value="25" step="any">
+      </div>
+      <div class="row" id="row_fov" style="display:none">
+        <label>Half-cone angle η<span class="hint">deg off nadir — payload FOV/2 or max look</span></label>
+        <input type="number" id="fov" value="15" step="any">
+      </div>
+      <div class="note" id="covnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Results</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Earth central angle λ</div><div class="v"><span id="r_lam">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Swath width</div><div class="v"><span id="r_swath">–</span> <span class="u">km</span></div></div>
+        <div class="metric"><div class="k">Footprint area</div><div class="v"><span id="r_area">–</span> <span class="u">km²</span></div></div>
+        <div class="metric"><div class="k">Fraction of Earth</div><div class="v"><span id="r_frac">–</span> <span class="u">%</span></div></div>
+        <div class="metric"><div class="k">Slant range @ edge</div><div class="v"><span id="r_slant">–</span> <span class="u">km</span></div></div>
+        <div class="metric"><div class="k">Nadir angle @ edge</div><div class="v"><span id="r_eta">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Elevation @ edge</div><div class="v"><span id="r_eps">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Horizon limit λ_max</div><div class="v"><span id="r_lmax">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Sats for equatorial ring</div><div class="v"><span id="r_ring">–</span> <span class="u"></span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the <b>altitude</b> and choose what limits the footprint: a <b>minimum elevation</b> seen from the ground (comms), or the payload's <b>half-cone angle</b> off nadir (imaging/SAR).</span><span class="zh-only">输入<b>高度</b>并选择限制足迹的因素：地面看到的<b>最低仰角</b>（通信），或载荷偏离星下点的<b>半锥角</b>（成像/SAR）。</span></li>
+      <li><span class="en-only">Read the <b>swath width</b>, <b>footprint area</b> and <b>slant range at the edge</b> — slant range drives the link budget at edge of coverage.</span><span class="zh-only">读取<b>幅宽</b>、<b>足迹面积</b>与<b>边缘斜距</b>——边缘斜距决定覆盖边缘处的链路预算。</span></li>
+      <li><span class="en-only">Compare the swath with the <b>equator spacing</b> from the Repeat Ground Track tool to confirm gap-free coverage within one repeat cycle.</span><span class="zh-only">把幅宽与<b>回归轨道</b>工具给出的赤道条带间距对比，确认一个回归周期内无缝覆盖。</span></li>
+      <li><span class="en-only">"Sats for equatorial ring" is a quick constellation sizing hint: how many satellites of this footprint are needed side by side around the equator.</span><span class="zh-only">"赤道环所需卫星数"是星座规模的快速提示：绕赤道一圈并排需要多少颗这样足迹的卫星。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Coverage geometry</h2>
+      <p>With r = R_E + h, for a minimum elevation ε the geometry gives</p>
+      <p><code>sin η = (R_E/r)·cos ε</code> &nbsp; and &nbsp; <code>λ = 90° − ε − η</code></p>
+      <p><strong>Swath width</strong> = 2·λ·R_E (great-circle arc); <strong>footprint area</strong> = 2π·R_E²·(1 − cos λ) (spherical cap); <strong>slant range</strong> = R_E·sin λ / sin η.</p>
+      <p>When constrained by a sensor half-cone η instead, the same triangle is solved for ε: <code>cos ε = (r/R_E)·sin η</code>. If that exceeds 1 the sensor looks past the horizon and the footprint is horizon-limited at <code>λ_max = acos(R_E/r)</code>.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>覆盖几何</h2>
+      <p>令 r = R_E + h，给定最低仰角 ε 时：</p>
+      <p><code>sin η = (R_E/r)·cos ε</code> &nbsp; 且 &nbsp; <code>λ = 90° − ε − η</code></p>
+      <p><strong>幅宽</strong> = 2·λ·R_E（大圆弧长）；<strong>足迹面积</strong> = 2π·R_E²·(1 − cos λ)（球冠）；<strong>斜距</strong> = R_E·sin λ / sin η。</p>
+      <p>改由传感器半锥角 η 限制时，对同一三角形解 ε：<code>cos ε = (r/R_E)·sin η</code>。若该值大于 1，说明传感器视线越过地平线，足迹受地平线限制，<code>λ_max = acos(R_E/r)</code>。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free satellite coverage calculator · swath, footprint, slant range · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const RE=6378.137;
+const D2R=Math.PI/180, R2D=180/Math.PI;
+
+function compute(){
+  const mode=$('mode').value;
+  $('row_elev').style.display=mode==='elev'?'':'none';
+  $('row_fov').style.display=mode==='fov'?'':'none';
+  const alt=num('alt'); if(alt<=0) return;
+  const r=RE+alt;
+  const lamMax=Math.acos(RE/r);
+  let eps,eta,lam,horizonLimited=false;
+  if(mode==='elev'){
+    eps=Math.min(Math.max(num('elev'),0),89.9)*D2R;
+    eta=Math.asin((RE/r)*Math.cos(eps));
+    lam=Math.PI/2-eps-eta;
+  }else{
+    eta=Math.min(Math.max(num('fov'),0.01),89.9)*D2R;
+    const ce=(r/RE)*Math.sin(eta);
+    if(ce>=1){ horizonLimited=true; lam=lamMax; eps=0; eta=Math.asin(RE/r); }
+    else { eps=Math.acos(ce); lam=Math.PI/2-eps-eta; }
+  }
+  const swath=2*lam*RE;
+  const area=2*Math.PI*RE*RE*(1-Math.cos(lam));
+  const frac=area/(4*Math.PI*RE*RE)*100;
+  const slant=Math.sin(eta)>1e-9?RE*Math.sin(lam)/Math.sin(eta):alt;
+  const ring=lam>1e-6?Math.ceil(Math.PI/lam):0;
+  const f1=x=>x.toFixed(1), f2=x=>x.toFixed(2);
+  $('r_lam').textContent=f2(lam*R2D);
+  $('r_swath').textContent=Math.round(swath).toLocaleString('en-US');
+  $('r_area').textContent=area>=1e6?(area/1e6).toFixed(2)+'M':Math.round(area).toLocaleString('en-US');
+  $('r_frac').textContent=f2(frac);
+  $('r_slant').textContent=Math.round(slant).toLocaleString('en-US');
+  $('r_eta').textContent=f2(eta*R2D);
+  $('r_eps').textContent=f2(eps*R2D);
+  $('r_lmax').textContent=f2(lamMax*R2D);
+  $('r_ring').textContent=ring||'–';
+  $('covnote').textContent = horizonLimited
+    ? t('Sensor half-cone reaches past the horizon — footprint is horizon-limited.','传感器半锥角超过地平线——足迹受地平线限制。')
+    : t('Edge of coverage: '+f1(slant)+' km slant range at '+f1(eps*R2D)+'° elevation.','覆盖边缘：仰角 '+f1(eps*R2D)+'°，斜距 '+f1(slant)+' km。');
+}
+const presets={
+  comm5:{alt:550,mode:'elev',elev:25},
+  eo:{alt:700,mode:'fov',fov:15},
+  sar:{alt:600,mode:'fov',fov:35},
+  geo:{alt:35786,mode:'elev',elev:10},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

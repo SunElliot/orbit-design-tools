@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sunelliot.github.io/orbit-design-tools/sitemap.xml

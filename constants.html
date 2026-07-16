@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrodynamic Constants & Typical Orbits Reference — Free Online Tool</title>
+<meta name="description" content="Quick reference for orbit design: Earth gravitational parameter, J2, radii, day lengths, plus a table of typical orbits — LEO, SSO, MEO/GPS, GEO, Molniya, GTO — with altitude, period and inclination.">
+<meta name="keywords" content="astrodynamic constants, earth gravitational parameter, J2 constant, sidereal day, typical satellite orbits, LEO SSO GEO MEO table">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/constants.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Astrodynamic Constants & Typical Orbits Reference">
+<meta property="og:description" content="Earth constants and a typical-orbit quick reference for orbit design.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html" class="active">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>📚 Astrodynamic Constants &amp; Typical Orbits</h1>
+  <p>Earth constants for orbit design · typical orbit quick reference</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2><span class="dot"></span>Earth &amp; Time Constants</h2>
+    <table>
+      <tr><th><span class="en-only">Constant</span><span class="zh-only">常数</span></th><th><span class="en-only">Symbol</span><span class="zh-only">符号</span></th><th><span class="en-only">Value</span><span class="zh-only">数值</span></th></tr>
+      <tr><td><span class="en-only">Gravitational parameter</span><span class="zh-only">地球引力常数</span></td><td>μ</td><td>398 600.4418 km³/s²</td></tr>
+      <tr><td><span class="en-only">Equatorial radius</span><span class="zh-only">赤道半径</span></td><td>R_E</td><td>6 378.137 km</td></tr>
+      <tr><td><span class="en-only">Mean radius</span><span class="zh-only">平均半径</span></td><td>–</td><td>6 371.0 km</td></tr>
+      <tr><td><span class="en-only">Oblateness (2nd zonal)</span><span class="zh-only">二阶带谐（扁率项）</span></td><td>J₂</td><td>1.082 626 68 × 10⁻³</td></tr>
+      <tr><td><span class="en-only">Earth rotation rate</span><span class="zh-only">地球自转速率</span></td><td>ω_E</td><td>7.292 115 9 × 10⁻⁵ rad/s</td></tr>
+      <tr><td><span class="en-only">Sidereal day</span><span class="zh-only">恒星日</span></td><td>–</td><td>86 164.0905 s (23 h 56 m 4.1 s)</td></tr>
+      <tr><td><span class="en-only">Solar day</span><span class="zh-only">太阳日</span></td><td>–</td><td>86 400 s</td></tr>
+      <tr><td><span class="en-only">Tropical year</span><span class="zh-only">回归年</span></td><td>–</td><td>365.2422 d</td></tr>
+      <tr><td><span class="en-only">Mean sun rate (SSO node rate)</span><span class="zh-only">平太阳速率（SSO 交点速率）</span></td><td>Ω̇_sun</td><td>+0.985 65 °/day</td></tr>
+      <tr><td><span class="en-only">GEO radius / altitude</span><span class="zh-only">GEO 半径 / 高度</span></td><td>–</td><td>42 164.2 km / 35 786.0 km</td></tr>
+      <tr><td><span class="en-only">Escape velocity (surface)</span><span class="zh-only">地表逃逸速度</span></td><td>–</td><td>11.186 km/s</td></tr>
+      <tr><td><span class="en-only">Solar constant</span><span class="zh-only">太阳常数</span></td><td>–</td><td>1 361 W/m²</td></tr>
+      <tr><td><span class="en-only">Critical inclination</span><span class="zh-only">临界倾角</span></td><td>–</td><td>63.435° / 116.565°</td></tr>
+    </table>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>Typical Orbits</h2>
+    <table>
+      <tr><th><span class="en-only">Orbit</span><span class="zh-only">轨道</span></th><th><span class="en-only">Altitude</span><span class="zh-only">高度</span></th><th><span class="en-only">Inclination</span><span class="zh-only">倾角</span></th><th><span class="en-only">Period</span><span class="zh-only">周期</span></th><th><span class="en-only">Typical use</span><span class="zh-only">典型用途</span></th></tr>
+      <tr><td>VLEO</td><td>250–450 km</td><td><span class="en-only">any</span><span class="zh-only">任意</span></td><td>89–93 min</td><td><span class="en-only">High-res imaging, drag-compensated</span><span class="zh-only">高分辨率成像，需阻力补偿</span></td></tr>
+      <tr><td>ISS</td><td>~420 km</td><td>51.6°</td><td>92.9 min</td><td><span class="en-only">Crewed station, microgravity</span><span class="zh-only">载人空间站、微重力</span></td></tr>
+      <tr><td>LEO / SSO</td><td>500–800 km</td><td>97.4–98.6°</td><td>94.6–100.9 min</td><td><span class="en-only">Earth observation, constant local time</span><span class="zh-only">对地观测，地方时恒定</span></td></tr>
+      <tr><td><span class="en-only">Broadband LEO</span><span class="zh-only">低轨宽带</span></td><td>500–1200 km</td><td>53–87.9°</td><td>95–109 min</td><td><span class="en-only">Comms megaconstellations</span><span class="zh-only">通信巨型星座</span></td></tr>
+      <tr><td>MEO / GPS</td><td>20 180 km</td><td>55°</td><td>11 h 58 m</td><td><span class="en-only">Navigation (GPS/BeiDou MEO/Galileo)</span><span class="zh-only">导航（GPS/北斗 MEO/伽利略）</span></td></tr>
+      <tr><td>GTO</td><td>250 × 35 786 km</td><td>6–28.5°</td><td>10.5 h</td><td><span class="en-only">Transfer to GEO</span><span class="zh-only">GEO 转移轨道</span></td></tr>
+      <tr><td>GEO</td><td>35 786 km</td><td>~0°</td><td>23 h 56 m</td><td><span class="en-only">Comms, broadcast, weather</span><span class="zh-only">通信、广播、气象</span></td></tr>
+      <tr><td>Molniya</td><td>600 × 39 750 km</td><td>63.4°</td><td>11 h 58 m</td><td><span class="en-only">High-latitude comms, frozen perigee</span><span class="zh-only">高纬通信，近地点冻结</span></td></tr>
+      <tr><td>Tundra</td><td>24 470 × 46 340 km</td><td>63.4°</td><td>23 h 56 m</td><td><span class="en-only">Regional high-latitude service</span><span class="zh-only">区域高纬服务</span></td></tr>
+      <tr><td><span class="en-only">Graveyard</span><span class="zh-only">坟墓轨道</span></td><td>GEO + ≥ 235 km</td><td>~0°</td><td>&gt; 23 h 56 m</td><td><span class="en-only">GEO end-of-life disposal</span><span class="zh-only">GEO 寿命末期处置</span></td></tr>
+    </table>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">All OrbitTools calculators use exactly these constants, so results are consistent across tools.</span><span class="zh-only">OrbitTools 所有计算器均使用本页常数，各工具结果保持一致。</span></li>
+      <li><span class="en-only">Use the typical-orbit rows as starting points, then refine altitude/inclination in the design tools.</span><span class="zh-only">典型轨道各行可作为设计起点，再用各设计工具细化高度/倾角。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Notes</h2>
+      <p>Values follow WGS-84 / EGM-96 conventions as commonly used in mission analysis (Vallado, SMAD). The critical inclination and the sun-rate are exact consequences of the J2 secular equations — see the J2 Perturbations tool. GEO altitude is quoted above the equator; the graveyard offset follows the IADC formula for typical spacecraft (≈ 235 km + area-to-mass term).</p>
+    </div>
+    <div class="article zh-only">
+      <h2>说明</h2>
+      <p>数值采用任务分析常用的 WGS-84 / EGM-96 约定（Vallado、SMAD）。临界倾角与太阳速率由 J2 长期方程精确导出——见 J2 摄动工具。GEO 高度为赤道上空值；坟墓轨道抬高量按 IADC 公式（≈ 235 km + 面质比项）。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Astrodynamic constants & typical orbits · quick reference for orbit design.</footer>
+
+<script src="share.js?v=1"></script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

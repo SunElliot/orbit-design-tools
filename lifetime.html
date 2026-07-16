@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbit Lifetime & Drag Decay Calculator — Free Online Tool</title>
+<meta name="description" content="Free orbital lifetime estimator. Integrates atmospheric drag decay from a reference density table (low/mean/high solar activity) to estimate LEO deorbit time, decay rate and drag make-up delta-v — with a 25-year rule check.">
+<meta name="keywords" content="orbit lifetime calculator, orbital decay, atmospheric drag, ballistic coefficient, 25 year rule, deorbit, drag makeup delta v">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/lifetime.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Orbit Lifetime & Drag Decay Calculator">
+<meta property="og:description" content="LEO drag decay integration, lifetime estimate and 25-year rule check.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Orbit Lifetime & Drag Decay Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html" class="active">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>⏳ Orbit Lifetime &amp; Drag Decay Calculator</h1>
+  <p>Drag decay integration · lifetime estimate · drag make-up Δv · 25-year rule check</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="cubesat">3U CubeSat 500 km</button>
+    <button data-preset="smallsat">Smallsat 550 km</button>
+    <button data-preset="vleo">VLEO imager 350 km</button>
+    <button data-preset="micro700">Microsat 700 km</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Spacecraft &amp; Orbit</h2>
+      <div class="row">
+        <label>Initial altitude<span class="hint">km, circular, 200–1500</span></label>
+        <input type="number" id="alt" value="500" step="any">
+      </div>
+      <div class="row">
+        <label>Spacecraft mass<span class="hint">kg</span></label>
+        <input type="number" id="mass" value="4" step="any">
+      </div>
+      <div class="row">
+        <label>Drag area<span class="hint">m², average projected</span></label>
+        <input type="number" id="area" value="0.045" step="any">
+      </div>
+      <div class="row">
+        <label>Drag coefficient C_d<span class="hint">typ. 2.2</span></label>
+        <input type="number" id="cd" value="2.2" step="any">
+      </div>
+      <div class="row">
+        <label>Solar activity<span class="hint">sets the density model</span></label>
+        <select id="solar" style="width:190px;text-align:left">
+          <option value="low">Low (F10.7 ≈ 70)</option>
+          <option value="mean" selected>Moderate (F10.7 ≈ 140)</option>
+          <option value="high">High (F10.7 ≈ 210)</option>
+        </select>
+      </div>
+      <div class="note" id="lfnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Results</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Ballistic coefficient</div><div class="v"><span id="r_bc">–</span> <span class="u">kg/m²</span></div></div>
+        <div class="metric"><div class="k">Density @ altitude</div><div class="v"><span id="r_rho">–</span> <span class="u">kg/m³</span></div></div>
+        <div class="metric"><div class="k">Initial decay rate</div><div class="v"><span id="r_decay">–</span> <span class="u">km/yr</span></div></div>
+        <div class="metric"><div class="k">Estimated lifetime</div><div class="v"><span id="r_life">–</span> <span class="u"></span></div></div>
+        <div class="metric"><div class="k">Drag make-up Δv</div><div class="v"><span id="r_dv">–</span> <span class="u">m/s/yr</span></div></div>
+        <div class="metric"><div class="k">25-year rule</div><div class="v"><span id="r_rule">–</span> <span class="u"></span></div></div>
+      </div>
+      <div id="ruleBox" class="margin-box margin-good">–</div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Altitude vs Time</h2>
+      <canvas id="chart" width="1000" height="380" style="width:100%;height:auto;display:block"></canvas>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the <b>altitude</b>, <b>mass</b>, average projected <b>drag area</b> and <b>C_d</b> (2.2 if unknown).</span><span class="zh-only">输入<b>高度</b>、<b>质量</b>、平均迎风<b>阻力面积</b>与 <b>C_d</b>（不确定时取 2.2）。</span></li>
+      <li><span class="en-only">Pick a <b>solar activity</b> level — LEO density varies by an order of magnitude over the 11-year cycle, so check both moderate and high.</span><span class="zh-only">选择<b>太阳活动</b>水平——LEO 大气密度随 11 年周期变化可达一个量级，建议中、高两档都算。</span></li>
+      <li><span class="en-only">Read the <b>lifetime</b> and the <b>25-year rule</b> verdict; the chart shows altitude vs time to re-entry (integration stops at 150 km).</span><span class="zh-only">读取<b>寿命</b>与 <b>25 年规则</b>结论；曲线为高度-时间衰减过程（积分至 150 km 终止）。</span></li>
+      <li><span class="en-only">The <b>drag make-up Δv</b> is what propulsion must supply per year to hold the altitude — feed it into your Δv budget.</span><span class="zh-only">“阻力补偿 Δv”为每年维持轨道高度所需速度增量——请计入 Δv 预算。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Drag decay model</h2>
+      <p>For a circular orbit the semi-major axis decays at <code>da/dt = −ρ·√(μa)·(C_d·A/m)</code>. The tool integrates this from the initial altitude down to 150 km, interpolating log-density in a reference table (CIRA/SMAD-class values) for the selected solar activity.</p>
+      <p>Drag make-up: continuous compensation of the drag deceleration <code>a_D = ½·ρ·v²·C_d·A/m</code> gives <code>Δv/year = a_D · 31.6×10⁶ s</code>.</p>
+      <p><strong>Accuracy:</strong> real lifetimes vary with the actual solar cycle phase, attitude history and density model — treat results as order-of-magnitude (±50% is typical even for professional tools). For compliance filings use a full propagator (e.g. NASA DAS/ORSAT-class analysis).</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>阻力衰减模型</h2>
+      <p>圆轨道半长轴衰减率为 <code>da/dt = −ρ·√(μa)·(C_d·A/m)</code>。工具从初始高度积分至 150 km，密度按所选太阳活动水平在参考密度表（CIRA/SMAD 量级）中做对数插值。</p>
+      <p>阻力补偿：连续抵消阻力减速度 <code>a_D = ½·ρ·v²·C_d·A/m</code>，得 <code>Δv/年 = a_D · 31.6×10⁶ s</code>。</p>
+      <p><strong>精度说明：</strong>实际寿命取决于太阳周期相位、姿态历史与密度模型——结果应视为量级估计（专业工具也常有 ±50% 偏差）。正式的空间碎片合规分析请使用完整轨道递推工具（如 NASA DAS/ORSAT 级）。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free orbit lifetime calculator · drag decay & 25-year rule · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137;
+
+/* Reference densities kg/m³ vs altitude (km) for low/mean/high solar activity
+   (CIRA-72 / SMAD-class order-of-magnitude values). */
+const RHO_TAB=[
+ [150,2.0e-9,2.1e-9,2.3e-9],[180,5.0e-10,5.6e-10,6.4e-10],[200,1.8e-10,2.5e-10,3.5e-10],
+ [250,3.4e-11,6.2e-11,1.06e-10],[300,8.2e-12,1.95e-11,3.96e-11],[350,2.3e-12,7.0e-12,1.66e-11],
+ [400,7.3e-13,2.7e-12,7.55e-12],[450,2.5e-13,1.13e-12,3.61e-12],[500,9.0e-14,4.9e-13,1.80e-12],
+ [550,3.6e-14,2.2e-13,9.25e-13],[600,1.7e-14,1.04e-13,4.89e-13],[650,9.1e-15,5.15e-14,2.64e-13],
+ [700,5.7e-15,2.7e-14,1.47e-13],[750,4.0e-15,1.55e-14,8.4e-14],[800,3.0e-15,9.6e-15,4.4e-14],
+ [850,2.3e-15,6.5e-15,3.0e-14],[900,1.8e-15,4.7e-15,1.9e-14],[950,1.4e-15,3.5e-15,1.3e-14],
+ [1000,1.2e-15,2.8e-15,8.8e-15],[1250,4.5e-16,1.1e-15,3.0e-15],[1500,2.0e-16,5.0e-16,1.2e-15]
+];
+function density(alt,col){           // col: 1 low, 2 mean, 3 high; log-interp
+  const tab=RHO_TAB;
+  if(alt<=tab[0][0]) return tab[0][col];
+  if(alt>=tab[tab.length-1][0]){     // extrapolate with last interval slope
+    const p1=tab[tab.length-2],p2=tab[tab.length-1];
+    const slope=(Math.log10(p2[col])-Math.log10(p1[col]))/(p2[0]-p1[0]);
+    return 10**(Math.log10(p2[col])+slope*(alt-p2[0]));
+  }
+  for(let ix=0;ix<tab.length-1;ix++){
+    if(alt>=tab[ix][0]&&alt<=tab[ix+1][0]){
+      const p1=tab[ix],p2=tab[ix+1];
+      const w=(alt-p1[0])/(p2[0]-p1[0]);
+      return 10**(Math.log10(p1[col])+w*(Math.log10(p2[col])-Math.log10(p1[col])));
+    }
+  }
+  return tab[tab.length-1][col];
+}
+const YR=31557600;                    // s
+let decayCurve=[];
+function compute(){
+  const alt0=num('alt'), m=num('mass'), A=num('area'), cd=num('cd');
+  if(alt0<160||m<=0||A<=0||cd<=0) return;
+  const col={low:1,mean:2,high:3}[$('solar').value];
+  const bstar=cd*A/m;                 // m²/kg
+  const rho0=density(alt0,col);
+  const a0=RE+alt0;
+  const v0=Math.sqrt(MU/a0)*1000;     // m/s
+  const dadt0=-rho0*Math.sqrt(MU*a0)*bstar*1e6;   // km/s: ρ[kg/m³]·√(μa)[km²/s... careful units]
+  /* Units: da/dt = ρ·√(μa)·B, with ρ in kg/m³ and √(μa) in km²/s we need B in m²/kg
+     and a length fix: ρ·B has 1/m; √(μa) km²/s = 1e6 m²/s → da/dt in m/s → /1000 km/s. */
+  const dadtKmS=-rho0*bstar*Math.sqrt(MU*a0)*1e6/1000;
+  const decayKmYr=Math.abs(dadtKmS)*YR;
+  const dvYr=0.5*rho0*v0*v0*bstar*YR; // m/s per year
+  // integrate decay
+  decayCurve=[[0,alt0]];
+  let alt=alt0,tSec=0;
+  const CAP=200*YR;
+  let capped=false;
+  for(let it=0;it<40000;it++){
+    if(alt<=150) break;
+    const aa=RE+alt;
+    const rate=density(alt,col)*bstar*Math.sqrt(MU*aa)*1e6/1000; // km/s (positive)
+    const dStep=Math.max(Math.min(alt-150,1),0.2);               // km per step
+    const dt=dStep/rate;
+    tSec+=dt; alt-=dStep;
+    decayCurve.push([tSec,alt]);
+    if(tSec>CAP){ capped=true; break; }
+  }
+  const f2=x=>x.toFixed(2);
+  $('r_bc').textContent=f2(m/(cd*A));
+  $('r_rho').textContent=rho0.toExponential(2);
+  $('r_decay').textContent=decayKmYr<0.01?decayKmYr.toExponential(2):f2(decayKmYr);
+  const lifeYr=tSec/YR;
+  let lifeTxt;
+  if(capped) lifeTxt='> 200 '+t('yr','年');
+  else if(lifeYr>=1) lifeTxt=f2(lifeYr)+' '+t('yr','年');
+  else lifeTxt=Math.round(lifeYr*365.25)+' '+t('days','天');
+  $('r_life').textContent=lifeTxt;
+  $('r_dv').textContent=dvYr<0.01?dvYr.toExponential(2):f2(dvYr);
+  const pass=!capped&&lifeYr<=25;
+  $('r_rule').textContent=capped?'✗':(pass?'✓':'✗');
+  const box=$('ruleBox');
+  if(pass){
+    box.className='margin-box margin-good';
+    box.textContent=t('Complies with the 25-year rule: natural decay in '+lifeTxt+'.','满足 25 年规则：自然衰降 '+lifeTxt+'。');
+  }else{
+    box.className='margin-box margin-bad';
+    box.textContent=t('Exceeds 25 years ('+lifeTxt+') — plan an active deorbit or a disposal orbit.','超过 25 年（'+lifeTxt+'）——需主动离轨或处置轨道方案。');
+  }
+  $('lfnote').textContent=t('Ballistic coefficient m/(C_d·A) = '+f2(m/(cd*A))+' kg/m². Higher = slower decay.','弹道系数 m/(C_d·A) = '+f2(m/(cd*A))+' kg/m²。数值越大衰降越慢。');
+  drawChart(capped);
+}
+function drawChart(capped){
+  const cv=$('chart'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,L=70,R=20,Tp=20,B=46;
+  ctx.clearRect(0,0,W,H);
+  if(decayCurve.length<2) return;
+  const tEnd=decayCurve[decayCurve.length-1][0];
+  const hMax=decayCurve[0][1], hMin=140;
+  const useYr=tEnd>2*YR;
+  const tScale=useYr?YR:86400;
+  const X=ts=>L+ts/tEnd*(W-L-R);
+  const Y=h=>Tp+(hMax-h)/(hMax-hMin)*(H-Tp-B);
+  ctx.strokeStyle='#c9d8f5';ctx.lineWidth=1;ctx.font='12px sans-serif';
+  const tTicks=5;
+  for(let k=0;k<=tTicks;k++){
+    const ts=tEnd*k/tTicks;
+    ctx.beginPath();ctx.moveTo(X(ts),Tp);ctx.lineTo(X(ts),H-B);ctx.stroke();
+    ctx.fillStyle='#697086';
+    ctx.fillText((ts/tScale).toFixed(1)+(useYr?t(' yr',' 年'):t(' d',' 天')),X(ts)-18,H-B+18);
+  }
+  const hStep=Math.max(50,Math.round((hMax-hMin)/6/50)*50);
+  for(let h=Math.ceil(hMin/hStep)*hStep;h<=hMax;h+=hStep){
+    ctx.beginPath();ctx.moveTo(L,Y(h));ctx.lineTo(W-R,Y(h));ctx.stroke();
+    ctx.fillStyle='#697086';ctx.fillText(h+' km',8,Y(h)+4);
+  }
+  ctx.strokeStyle='#dc2626';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(L,Y(150));ctx.lineTo(W-R,Y(150));ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#2563eb';ctx.lineWidth=2.5;ctx.beginPath();
+  let started=false;
+  for(const p of decayCurve){
+    const px=X(p[0]),py=Y(p[1]);
+    started?ctx.lineTo(px,py):ctx.moveTo(px,py);started=true;
+  }
+  ctx.stroke();
+  ctx.fillStyle='#374151';
+  ctx.fillText(capped?t('Capped at 200 years','已截断于 200 年'):t('Altitude decay to 150 km re-entry','衰降至 150 km 再入'),L+8,Tp+14);
+}
+const presets={
+  cubesat:{alt:500,mass:4,area:0.045,cd:2.2,solar:'mean'},
+  smallsat:{alt:550,mass:150,area:1.2,cd:2.2,solar:'mean'},
+  vleo:{alt:350,mass:80,area:0.9,cd:2.4,solar:'mean'},
+  micro700:{alt:700,mass:60,area:0.6,cd:2.2,solar:'mean'},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

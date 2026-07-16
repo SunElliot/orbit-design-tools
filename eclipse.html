@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Beta Angle & Eclipse Calculator — Free Online Tool</title>
+<meta name="description" content="Free satellite beta angle and eclipse calculator. Compute the solar beta angle, eclipse fraction and eclipse duration per orbit, with a full-year chart including J2 node drift — for LEO, SSO and GEO.">
+<meta name="keywords" content="beta angle calculator, satellite eclipse duration, eclipse season, sun synchronous LTAN, umbra, spacecraft power thermal design">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/eclipse.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Solar Beta Angle & Eclipse Calculator">
+<meta property="og:description" content="Beta angle, eclipse duration per orbit and a full-year chart with J2 node drift.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Solar Beta Angle & Eclipse Calculator","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html" class="active">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>🌗 Solar Beta Angle &amp; Eclipse Calculator</h1>
+  <p>Beta angle · eclipse fraction &amp; duration per orbit · full-year evolution with J2 node drift</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="iss">ISS-like 420 / 51.6°</button>
+    <button data-preset="sso1030">SSO 10:30 / 700 km</button>
+    <button data-preset="dawnDusk">SSO dawn-dusk 06:00</button>
+    <button data-preset="geo">GEO</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Orbit &amp; Date</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="alt" value="420" step="any">
+      </div>
+      <div class="row">
+        <label>Orbit type<span class="hint">SSO: node follows the sun</span></label>
+        <select id="otype" style="width:210px;text-align:left">
+          <option value="general">General (i, RAAN)</option>
+          <option value="sso">Sun-synchronous (LTAN)</option>
+        </select>
+      </div>
+      <div class="row" id="row_inc">
+        <label>Inclination<span class="hint">deg</span></label>
+        <input type="number" id="inc" value="51.6" step="any">
+      </div>
+      <div class="row" id="row_raan">
+        <label>RAAN Ω<span class="hint">deg, at the date below</span></label>
+        <input type="number" id="raan" value="0" step="any">
+      </div>
+      <div class="row" id="row_ltan" style="display:none">
+        <label>LTAN<span class="hint">local time of ascending node, hours</span></label>
+        <input type="number" id="ltan" value="10.5" step="any" min="0" max="24">
+      </div>
+      <div class="row">
+        <label>Date<span class="hint">start of the 1-year sweep</span></label>
+        <input type="date" id="date" style="width:170px">
+      </div>
+      <div class="note" id="ecnote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Results (at date)</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">Beta angle β</div><div class="v"><span id="r_beta">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Eclipse threshold β*</div><div class="v"><span id="r_bstar">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Eclipse fraction</div><div class="v"><span id="r_frac">–</span> <span class="u">%</span></div></div>
+        <div class="metric"><div class="k">Eclipse duration</div><div class="v"><span id="r_dur">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Sunlit time / orbit</div><div class="v"><span id="r_sun">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Max |β| over year</div><div class="v"><span id="r_bmax">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Max eclipse over year</div><div class="v"><span id="r_emax">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Eclipse-free days / year</div><div class="v"><span id="r_free">–</span> <span class="u">d</span></div></div>
+      </div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>One-Year Evolution — β (green) &amp; eclipse minutes (blue)</h2>
+      <canvas id="chart" width="1000" height="420" style="width:100%;height:auto;display:block"></canvas>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the <b>altitude</b> and either <b>i + RAAN</b> (general orbit) or <b>LTAN</b> (sun-synchronous).</span><span class="zh-only">输入<b>高度</b>，一般轨道填<b>倾角 + 升交点赤经</b>，太阳同步轨道填 <b>LTAN</b>。</span></li>
+      <li><span class="en-only">Read today's <b>β angle</b> and <b>eclipse duration</b>; the chart sweeps a full year with the node drifting at the J2 rate (or the sun rate for SSO).</span><span class="zh-only">读取当天的 <b>β 角</b>与<b>阴影时长</b>；曲线按 J2 速率（SSO 按太阳速率）推演升交点，扫描整年。</span></li>
+      <li><span class="en-only">Power sizing uses the <b>max eclipse</b> (battery) and <b>min sunlit fraction</b> (array); thermal cases use max and min |β|.</span><span class="zh-only">能源设计取<b>最长阴影</b>（电池）与最短光照比（帆板）；热设计取 |β| 的最大/最小工况。</span></li>
+      <li><span class="en-only">A dawn-dusk SSO (LTAN ≈ 6 h) keeps |β| high — often eclipse-free for most of the year, ideal for SAR power and simple thermal design.</span><span class="zh-only">晨昏太阳同步轨道（LTAN ≈ 6 时）β 角常年很大——一年大部分时间无阴影，适合 SAR 供电与简化热设计。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>Beta angle and eclipse model</h2>
+      <p>The beta angle is the angle between the sun vector and the orbit plane:</p>
+      <p><code>sin β = cos δ_s·sin i·sin(Ω − α_s) + sin δ_s·cos i</code></p>
+      <p>with (α_s, δ_s) the sun's right ascension/declination from a low-precision ephemeris. For a circular orbit in a cylindrical Earth shadow, an eclipse occurs when |β| &lt; β* where <code>sin β* = R_E/(R_E+h)</code>, and the eclipse fraction is</p>
+      <p><code>f_E = (1/π)·acos( √(h²+2·R_E·h) / ((R_E+h)·cos β) )</code></p>
+      <p>The year sweep advances Ω at the J2 secular rate (sun rate for SSO) and the sun along the ecliptic. Penumbra and oblateness effects (~±1–2 min) are neglected — adequate for power/thermal sizing.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>β 角与阴影模型</h2>
+      <p>β 角为太阳矢量与轨道面的夹角：</p>
+      <p><code>sin β = cos δ_s·sin i·sin(Ω − α_s) + sin δ_s·cos i</code></p>
+      <p>其中 (α_s, δ_s) 为低精度星历给出的太阳赤经/赤纬。圆轨道、圆柱形地影假设下，当 |β| &lt; β*（<code>sin β* = R_E/(R_E+h)</code>）时出现阴影，阴影比例为</p>
+      <p><code>f_E = (1/π)·acos( √(h²+2·R_E·h) / ((R_E+h)·cos β) )</code></p>
+      <p>全年推演中 Ω 按 J2 长期速率（SSO 按太阳速率）推进，太阳沿黄道运动。忽略半影与地球扁率影响（约 ±1–2 分钟），满足能源/热设计精度。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free beta angle & eclipse calculator · full-year evolution · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137, J2=1.08262668e-3;
+const SSRATE_DEG=0.98564736;          // deg/day
+const D2R=Math.PI/180, R2D=180/Math.PI;
+
+function sunRaDec(daysJ2000){         // low-precision solar ephemeris
+  const L=(280.460+0.9856474*daysJ2000)%360;
+  const g=((357.528+0.9856003*daysJ2000)%360)*D2R;
+  const lam=(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*D2R;
+  const eps=(23.439-4e-7*daysJ2000)*D2R;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  return {ra,dec};
+}
+function betaAngle(inc,raan,sun){     // all rad
+  const sb=Math.cos(sun.dec)*Math.sin(inc)*Math.sin(raan-sun.ra)+Math.sin(sun.dec)*Math.cos(inc);
+  return Math.asin(Math.min(1,Math.max(-1,sb)));
+}
+function eclipseFrac(alt,beta){       // cylindrical shadow, circular orbit
+  const r=RE+alt;
+  const bstar=Math.asin(RE/r);
+  if(Math.abs(beta)>=bstar) return 0;
+  const x=Math.sqrt(alt*alt+2*RE*alt)/(r*Math.cos(beta));
+  return Math.acos(Math.min(1,x))/Math.PI;
+}
+function raanRateDeg(alt,inc){        // deg/day, J2, circular
+  const a=RE+alt, n=Math.sqrt(MU/(a*a*a));
+  return -1.5*n*J2*(RE/a)*(RE/a)*Math.cos(inc)*86400*R2D;
+}
+function ssoInc(alt){
+  const a=RE+alt, n=Math.sqrt(MU/(a*a*a));
+  const c=-(SSRATE_DEG*D2R/86400)/(1.5*n*J2*(RE/a)*(RE/a));
+  return Math.abs(c)<=1?Math.acos(c):NaN;
+}
+function daysSinceJ2000(dateStr){
+  const dd=dateStr?new Date(dateStr+'T12:00:00Z'):new Date();
+  return (dd.getTime()-Date.UTC(2000,0,1,12))/86400000;
+}
+let yearData=[];
+function compute(){
+  const sso=$('otype').value==='sso';
+  $('row_inc').style.display=sso?'none':'';
+  $('row_raan').style.display=sso?'none':'';
+  $('row_ltan').style.display=sso?'':'none';
+  const alt=num('alt'); if(alt<=100) return;
+  const a=RE+alt;
+  const T=2*Math.PI*Math.sqrt(a*a*a/MU)/60;   // min
+  const d0=daysSinceJ2000($('date').value);
+  let inc,raan0,rateDeg;
+  if(sso){
+    inc=ssoInc(alt);
+    if(isNaN(inc)){ $('ecnote').textContent=t('No SSO solution at this altitude.','该高度无太阳同步解。'); return; }
+    const sun0=sunRaDec(d0);
+    raan0=sun0.ra*R2D+(num('ltan')-12)*15;
+    rateDeg=SSRATE_DEG;
+  }else{
+    inc=num('inc')*D2R;
+    raan0=num('raan');
+    rateDeg=raanRateDeg(alt,inc);
+  }
+  yearData=[];
+  let bmax=0,emax=0,freeDays=0;
+  for(let d=0;d<=365;d++){
+    const sun=sunRaDec(d0+d);
+    const beta=betaAngle(inc,(raan0+rateDeg*d)*D2R,sun);
+    const fe=eclipseFrac(alt,beta);
+    yearData.push({d,beta:beta*R2D,ecl:fe*T});
+    if(Math.abs(beta*R2D)>bmax)bmax=Math.abs(beta*R2D);
+    if(fe*T>emax)emax=fe*T;
+    if(d<365&&fe===0)freeDays++;
+  }
+  const today=yearData[0];
+  const bstar=Math.asin(RE/a)*R2D;
+  const fe0=eclipseFrac(alt,today.beta*D2R);
+  const f1=x=>x.toFixed(1), f2=x=>x.toFixed(2);
+  $('r_beta').textContent=f2(today.beta);
+  $('r_bstar').textContent=f2(bstar);
+  $('r_frac').textContent=f1(fe0*100);
+  $('r_dur').textContent=f1(today.ecl);
+  $('r_sun').textContent=f1(T-today.ecl);
+  $('r_bmax').textContent=f1(bmax);
+  $('r_emax').textContent=f1(emax);
+  $('r_free').textContent=freeDays;
+  $('ecnote').textContent = fe0===0
+    ? t('|β| > β* — the orbit is currently eclipse-free.','|β| > β* —— 当前轨道无阴影。')
+    : t('Eclipse '+f1(today.ecl)+' min per '+f1(T)+' min orbit ('+f1(fe0*100)+'%).','每圈 '+f1(T)+' 分钟中阴影 '+f1(today.ecl)+' 分钟（'+f1(fe0*100)+'%）。');
+  drawChart();
+}
+function drawChart(){
+  const cv=$('chart'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,L=64,R=64,Tp=20,B=44;
+  ctx.clearRect(0,0,W,H);
+  if(!yearData.length) return;
+  const bmin=Math.min(...yearData.map(p=>p.beta),-5), bmax=Math.max(...yearData.map(p=>p.beta),5);
+  const em=Math.max(...yearData.map(p=>p.ecl),5);
+  const X=d=>L+d/365*(W-L-R);
+  const Yb=v=>Tp+(bmax-v)/(bmax-bmin)*(H-Tp-B);
+  const Ye=v=>Tp+(em-v)/em*(H-Tp-B);
+  ctx.strokeStyle='#c9d8f5';ctx.lineWidth=1;ctx.font='12px sans-serif';
+  for(let m=0;m<=12;m+=2){const d=m*30.4;ctx.beginPath();ctx.moveTo(X(d),Tp);ctx.lineTo(X(d),H-B);ctx.stroke();
+    ctx.fillStyle='#697086';ctx.fillText('+'+m+t('mo','月'),X(d)-12,H-B+18);}
+  const step=(bmax-bmin)>60?30:15;
+  for(let v=Math.ceil(bmin/step)*step;v<=bmax;v+=step){ctx.beginPath();ctx.moveTo(L,Yb(v));ctx.lineTo(W-R,Yb(v));ctx.stroke();
+    ctx.fillStyle='#16a34a';ctx.fillText(v+'°',8,Yb(v)+4);}
+  for(let v=0;v<=em;v+=10){ctx.fillStyle='#2563eb';ctx.fillText(v.toFixed(0)+'m',W-R+8,Ye(v)+4);}
+  if(bmin<0&&bmax>0){ctx.strokeStyle='#94a3b8';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(L,Yb(0));ctx.lineTo(W-R,Yb(0));ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle='#16a34a';ctx.lineWidth=2.2;ctx.beginPath();
+  yearData.forEach((p,ix)=>{ix?ctx.lineTo(X(p.d),Yb(p.beta)):ctx.moveTo(X(p.d),Yb(p.beta));});
+  ctx.stroke();
+  ctx.strokeStyle='#2563eb';ctx.lineWidth=2.2;ctx.beginPath();
+  yearData.forEach((p,ix)=>{ix?ctx.lineTo(X(p.d),Ye(p.ecl)):ctx.moveTo(X(p.d),Ye(p.ecl));});
+  ctx.stroke();
+  ctx.fillStyle='#374151';ctx.fillText(t('β angle (green, left) · eclipse min/orbit (blue, right)','β 角（绿，左轴）· 每圈阴影分钟数（蓝，右轴）'),L+8,Tp+14);
+}
+const presets={
+  iss:{alt:420,otype:'general',inc:51.6,raan:0},
+  sso1030:{alt:700,otype:'sso',ltan:10.5},
+  dawnDusk:{alt:600,otype:'sso',ltan:6},
+  geo:{alt:35786,otype:'general',inc:0,raan:0},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+(function(){const dd=new Date();$('date').value=dd.toISOString().slice(0,10);})();
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun-Synchronous Orbit Designer — SSO Inclination Calculator — Free Online Tool</title>
+<meta name="description" content="Free sun-synchronous orbit (SSO) calculator. Compute the required inclination from altitude using the J2 nodal precession condition, plus period, revs/day and ground-track shift.">
+<meta name="keywords" content="sun synchronous orbit calculator, SSO inclination, nodal precession, J2, LTAN, earth observation orbit design">
+<link rel="canonical" href="https://sunelliot.github.io/orbit-design-tools/sso.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sun-Synchronous Orbit Designer">
+<meta property="og:description" content="Required SSO inclination vs altitude from the J2 nodal precession condition.">
+<link rel="stylesheet" href="styles.css?v=1">
+<script src="i18n.js?v=1"></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Sun-Synchronous Orbit Designer","applicationCategory":"EngineeringApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">🚀 OrbitTools</a>
+</nav>
+
+<div class="page">
+<aside class="sidebar">
+  <a class="home" href="index.html" style="display:block;text-decoration:none">← All tools</a>
+  <ul class="toolnav">
+    <li class="grp">Orbit Design</li>
+    <li><a href="orbit-basics.html">Orbit Basics</a></li>
+    <li><a href="sso.html" class="active">Sun-Synchronous Orbit</a></li>
+    <li><a href="repeat-orbit.html">Repeat Ground Track</a></li>
+    <li><a href="perturbations.html">J2 Perturbations</a></li>
+    <li class="grp">Mission Analysis</li>
+    <li><a href="coverage.html">Coverage &amp; Swath</a></li>
+    <li><a href="eclipse.html">Beta Angle &amp; Eclipse</a></li>
+    <li><a href="lifetime.html">Orbit Lifetime</a></li>
+    <li class="grp">Maneuvers</li>
+    <li><a href="maneuver.html">Δv Budget</a></li>
+    <li class="grp">Constellation</li>
+    <li><a href="constellation.html">Walker Constellation</a></li>
+    <li class="grp">Reference</li>
+    <li><a href="constants.html">Constants &amp; Orbits</a></li>
+  </ul>
+</aside>
+<div class="pagemain">
+
+<header>
+  <h1>☀️ Sun-Synchronous Orbit Designer</h1>
+  <p>Required inclination vs altitude · nodal precession · period · ground-track shift</p>
+</header>
+
+<div class="wrap">
+  <div class="preset-bar">
+    <button data-preset="vleo">VLEO 350 km</button>
+    <button data-preset="sso500">EO 500 km</button>
+    <button data-preset="sso700">EO 700 km</button>
+    <button data-preset="dawn">Dawn-dusk 800 km</button>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2><span class="dot"></span>Inputs</h2>
+      <div class="row">
+        <label>Orbit altitude<span class="hint">km, circular</span></label>
+        <input type="number" id="alt" value="500" step="any">
+      </div>
+      <div class="row">
+        <label>Eccentricity<span class="hint">0 for circular, &lt; 0.3</span></label>
+        <input type="number" id="ecc" value="0" step="any" min="0" max="0.3">
+      </div>
+      <div class="note" id="ssonote"></div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>Results</h2>
+      <div class="resgrid">
+        <div class="metric"><div class="k">SSO inclination</div><div class="v"><span id="r_inc">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Nodal precession</div><div class="v"><span id="r_raandot">–</span> <span class="u">°/day</span></div></div>
+        <div class="metric"><div class="k">Orbital period</div><div class="v"><span id="r_T">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Nodal period</div><div class="v"><span id="r_Tn">–</span> <span class="u">min</span></div></div>
+        <div class="metric"><div class="k">Mean motion</div><div class="v"><span id="r_n">–</span> <span class="u">rev/day</span></div></div>
+        <div class="metric"><div class="k">Ground-track shift / rev</div><div class="v"><span id="r_shift">–</span> <span class="u">deg</span></div></div>
+        <div class="metric"><div class="k">Equator spacing / rev</div><div class="v"><span id="r_shiftkm">–</span> <span class="u">km</span></div></div>
+      </div>
+    </div>
+
+    <div class="card results">
+      <h2><span class="dot"></span>SSO Inclination vs Altitude</h2>
+      <canvas id="chart" width="1000" height="380" style="width:100%;height:auto;display:block"></canvas>
+    </div>
+  </div>
+
+  <div class="adslot">Ad placeholder</div>
+
+  <div class="card">
+    <h2><span class="dot"></span>📖 How to use</h2>
+    <ol class="howto">
+      <li><span class="en-only">Enter the <b>circular altitude</b> (and eccentricity if slightly elliptical) — the tool solves the inclination that makes the node precess at the sun rate, +0.9856°/day.</span><span class="zh-only">输入<b>圆轨道高度</b>（若略椭圆可填偏心率）——工具求解使升交点以太阳速率 +0.9856°/天 进动的倾角。</span></li>
+      <li><span class="en-only">Read the <b>SSO inclination</b> (always retrograde, &gt; 90°), the <b>period</b> and the <b>ground-track shift per rev</b>.</span><span class="zh-only">读取 <b>SSO 倾角</b>（逆行轨道，恒 &gt; 90°）、<b>周期</b>与<b>每圈地面轨迹西移量</b>。</span></li>
+      <li><span class="en-only">Pick a local time at the node (<b>LTAN/LTDN</b>) for lighting: 10:30 for optical imaging, 06:00 dawn-dusk for radar/power — the LTAN itself does not change the geometry computed here.</span><span class="zh-only">按光照选择降交点/升交点地方时（<b>LTAN/LTDN</b>）：光学成像常用 10:30，雷达/供电常用 06:00 晨昏轨道——LTAN 不影响本页几何结果。</span></li>
+      <li><span class="en-only">Continue in <b>Repeat Ground Track</b> to pick an altitude with an exact revisit cycle, and in <b>Beta Angle &amp; Eclipse</b> to check lighting over the year.</span><span class="zh-only">接着用<b>回归轨道</b>工具选取具有精确回归周期的高度，用<b>β 角与阴影</b>工具检查全年光照。</span></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="article en-only">
+      <h2>The sun-synchronous condition</h2>
+      <p>J2 (Earth oblateness) makes the ascending node precess at</p>
+      <p><code>Ω̇ = −(3/2)·J₂·n·(R_E/p)²·cos i</code></p>
+      <p>A <strong>sun-synchronous orbit</strong> chooses i so that Ω̇ equals the mean sun rate, 360°/365.2422 d = <strong>+0.9856°/day</strong>. The orbit plane then keeps a fixed orientation to the sun, so every pass sees the ground at the same local solar time — ideal for optical Earth observation (consistent shadows) and for dawn-dusk power/thermal design.</p>
+      <p>Solving for inclination: <code>cos i = −Ω̇_sun / ((3/2)·J₂·n·(R_E/p)²)</code>. Because cos i must be negative, SSO is always retrograde (i ≈ 96–99° for LEO). Above ≈ 5 970 km altitude no solution exists.</p>
+      <p>All computation runs locally in your browser.</p>
+    </div>
+    <div class="article zh-only">
+      <h2>太阳同步条件</h2>
+      <p>地球扁率(J2)使升交点以下式进动：</p>
+      <p><code>Ω̇ = −(3/2)·J₂·n·(R_E/p)²·cos i</code></p>
+      <p><strong>太阳同步轨道</strong>选择倾角 i，使 Ω̇ 等于平太阳速率 360°/365.2422 天 = <strong>+0.9856°/天</strong>。轨道面相对太阳保持固定取向，每次过境的地方太阳时相同——最适合光学对地观测（光照一致）与晨昏轨道的能源/热设计。</p>
+      <p>解倾角：<code>cos i = −Ω̇_sun / ((3/2)·J₂·n·(R_E/p)²)</code>。因 cos i 必须为负，SSO 恒为逆行轨道（LEO 约 96–99°）。高度超过约 5 970 km 无解。</p>
+      <p>全部计算在你的浏览器本地完成。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer>Free sun-synchronous orbit calculator · J2 nodal precession · nothing leaves your browser.</footer>
+
+<script src="share.js?v=1"></script>
+<script>
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value)||0;
+const MU=398600.4418, RE=6378.137, J2=1.08262668e-3;
+const WE=7.2921159e-5;                 // rad/s, Earth rotation (sidereal)
+const SSRATE=1.99096871e-7;            // rad/s, +0.9856 deg/day
+const D2R=Math.PI/180, R2D=180/Math.PI;
+
+function ssoInc(a,e){                  // returns inclination in rad, or NaN
+  const p=a*(1-e*e), n=Math.sqrt(MU/(a*a*a));
+  const c=-SSRATE/(1.5*n*J2*(RE/p)*(RE/p));
+  return Math.abs(c)<=1?Math.acos(c):NaN;
+}
+function rates(a,e,i){                 // J2 secular rates, rad/s
+  const p=a*(1-e*e), n=Math.sqrt(MU/(a*a*a));
+  const k=1.5*n*J2*(RE/p)*(RE/p), s2=Math.sin(i)**2;
+  const raanDot=-k*Math.cos(i);
+  const argpDot=0.5*k*(4-5*s2);
+  const mDot=n+0.5*k*Math.sqrt(1-e*e)*(2-3*s2);
+  return {raanDot,argpDot,mDot};
+}
+function compute(){
+  const alt=num('alt'), e=Math.min(Math.max(num('ecc'),0),0.3);
+  const a=RE+alt;
+  if(alt<=100){ return; }
+  const inc=ssoInc(a,e);
+  const f2=x=>x.toFixed(2), f3=x=>x.toFixed(3);
+  if(isNaN(inc)){
+    $('r_inc').textContent='–';
+    $('ssonote').textContent=t('No sun-synchronous solution at this altitude (needed |cos i| > 1). SSO exists only below ≈ 5 970 km.','该高度无太阳同步解（所需 |cos i| > 1）。SSO 仅存在于约 5 970 km 以下。');
+    drawChart(alt);
+    return;
+  }
+  const {raanDot,argpDot,mDot}=rates(a,e,inc);
+  const T=2*Math.PI/Math.sqrt(MU/(a*a*a));
+  const Tn=2*Math.PI/(mDot+argpDot);
+  const shift=(WE-raanDot)*Tn;         // rad westward per nodal rev
+  $('r_inc').textContent=f3(inc*R2D);
+  $('r_raandot').textContent='+'+f4dg(raanDot);
+  $('r_T').textContent=f2(T/60);
+  $('r_Tn').textContent=f2(Tn/60);
+  $('r_n').textContent=f2(86400/Tn);
+  $('r_shift').textContent=f2(shift*R2D);
+  $('r_shiftkm').textContent=Math.round(shift*RE).toLocaleString('en-US');
+  $('ssonote').textContent=t('Retrograde orbit: i = '+f3(inc*R2D)+'°. The node precesses eastward at the sun rate, keeping local solar time constant.','逆行轨道：i = '+f3(inc*R2D)+'°。升交点以太阳速率向东进动，地方太阳时保持不变。');
+  drawChart(alt);
+}
+function f4dg(radPerS){ return (radPerS*86400*R2D).toFixed(4); }
+
+function drawChart(curAlt){
+  const cv=$('chart'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,L=70,R=20,Tp=20,B=46;
+  ctx.clearRect(0,0,W,H);
+  const a0=200,a1=2000;
+  const pts=[];
+  for(let h=a0;h<=a1;h+=10){
+    const i=ssoInc(RE+h,0); if(!isNaN(i)) pts.push([h,i*R2D]);
+  }
+  const y0=95,y1=105;
+  const X=h=>L+(h-a0)/(a1-a0)*(W-L-R);
+  const Y=v=>Tp+(y1-v)/(y1-y0)*(H-Tp-B);
+  ctx.strokeStyle='#c9d8f5';ctx.lineWidth=1;ctx.font='12px sans-serif';ctx.fillStyle='#697086';
+  for(let v=y0;v<=y1;v+=2){ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(W-R,Y(v));ctx.stroke();ctx.fillText(v+'°',8,Y(v)+4);}
+  for(let h=200;h<=a1;h+=300){ctx.beginPath();ctx.moveTo(X(h),Tp);ctx.lineTo(X(h),H-B);ctx.stroke();ctx.fillText(h+' km',X(h)-18,H-B+18);}
+  ctx.strokeStyle='#2563eb';ctx.lineWidth=2.5;ctx.beginPath();
+  pts.forEach((pnt,ix)=>{const px=X(pnt[0]),py=Y(pnt[1]);ix?ctx.lineTo(px,py):ctx.moveTo(px,py);});
+  ctx.stroke();
+  if(curAlt>=a0&&curAlt<=a1){
+    const i=ssoInc(RE+curAlt,0);
+    if(!isNaN(i)){ctx.fillStyle='#16a34a';ctx.beginPath();ctx.arc(X(curAlt),Y(i*R2D),5,0,7);ctx.fill();}
+  }
+  ctx.fillStyle='#374151';ctx.fillText(t('SSO inclination vs circular altitude','太阳同步倾角 vs 圆轨道高度'),L+8,Tp+14);
+}
+const presets={
+  vleo:{alt:350,ecc:0},
+  sso500:{alt:500,ecc:0},
+  sso700:{alt:700,ecc:0},
+  dawn:{alt:800,ecc:0},
+};
+document.querySelectorAll('.preset-bar button').forEach(b=>b.addEventListener('click',()=>{
+  const c=presets[b.dataset.preset];for(const k in c)$(k).value=c[k];compute();}));
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',compute));
+if(window.ShareTool) ShareTool.apply();
+compute();
+if(window.ShareTool) ShareTool.initButton();
+if(window.onLang) window.onLang(compute);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>
