@@ -153,6 +153,7 @@
 <footer>Free beta angle & eclipse calculator · full-year evolution · nothing leaves your browser.</footer>
 
 <script src="share.js?v=1"></script>
+<script src="xlink.js?v=1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const num=id=>parseFloat($(id).value)||0;
@@ -241,6 +242,7 @@ function compute(){
   $('ecnote').textContent = fe0===0
     ? t('|β| > β* — the orbit is currently eclipse-free.','|β| > β* —— 当前轨道无阴影。')
     : t('Eclipse '+f1(today.ecl)+' min per '+f1(T)+' min orbit ('+f1(fe0*100)+'%).','每圈 '+f1(T)+' 分钟中阴影 '+f1(today.ecl)+' 分钟（'+f1(fe0*100)+'%）。');
+  if(window.XLink) XLink.update({ecl:today.ecl,sun:T-today.ecl,period:T,eclmax:emax,sunmin:T-emax});
   drawChart();
 }
 function drawChart(){
